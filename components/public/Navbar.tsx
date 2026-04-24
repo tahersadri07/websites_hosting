@@ -21,7 +21,7 @@ interface NavbarProps {
     template?: TemplateConfig | null;
 }
 
-export function Navbar({ businessName, logoUrl, whatsappNumber, siteSlug, template }: NavbarProps) {
+export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, siteSlug, template }: NavbarProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const t = useTranslations("nav");
