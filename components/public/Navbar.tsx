@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Menu, X, MessageCircle, Heart, ShoppingCart } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { cn } from "@/lib/utils";
@@ -35,7 +35,6 @@ export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, s
     const [scrolled, setScrolled] = useState(false);
     const [showServicesDropdown, setShowServicesDropdown] = useState(false);
     const t = useTranslations("nav");
-    const locale = useLocale();
     const pathname = usePathname();
     const router = useRouter();
 
@@ -60,11 +59,6 @@ export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, s
         { href: `${base}/contact`,  label: t("contact") },
     ];
 
-    const toggleLocale = () => {
-        const next = locale === "en" ? "hi" : "en";
-        document.cookie = `NEXT_LOCALE=${next}; path=/; max-age=31536000`;
-        router.refresh();
-    };
 
     const handleWhatsApp = () => {
         if (whatsappNumber) window.open(`https://wa.me/${whatsappNumber.replace(/\D/g, "")}`, "_blank");
@@ -170,10 +164,6 @@ export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, s
                             )}
                         </button>
                     </div>
-                    <button onClick={toggleLocale}
-                        className="text-xs font-semibold text-zinc-500 hover:text-white transition-colors px-2 py-1 rounded-lg hover:bg-white/5">
-                        {t("language")}
-                    </button>
                     {whatsappNumber && (
                         <button onClick={handleWhatsApp}
                             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-indigo-500/25">
@@ -236,10 +226,6 @@ export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, s
                         </div>
                     ))}
                     <div className="border-t border-[#27272A] mt-4 pt-4 space-y-2">
-                        <button onClick={toggleLocale}
-                            className="w-full px-4 py-2.5 rounded-xl text-sm text-zinc-500 hover:text-white hover:bg-white/5 transition-all text-left">
-                            {t("language")}
-                        </button>
                         {whatsappNumber && (
                             <button onClick={() => { handleWhatsApp(); setIsOpen(false); }}
                                 className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-semibold">
