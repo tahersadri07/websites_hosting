@@ -56,6 +56,7 @@ export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, s
             categories: categories
         },
         { href: `${base}/gallery`,  label: t("gallery") },
+        { href: `${base}/track-order`, label: "Track Order" },
         { href: `${base}/contact`,  label: t("contact") },
     ];
 

@@ -114,6 +114,7 @@ export default async function SiteLayout({ children, params }: Props) {
                         />
                         {business.whatsapp && <FloatingWhatsApp phone={business.whatsapp} />}
                         <FloatingCart 
+                            businessId={business.id}
                             businessName={business.name} 
                             whatsappNumber={business.whatsapp}
                             currencySymbol={(business as any).currency_symbol ?? "₹"}

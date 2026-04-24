@@ -19,12 +19,13 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 interface Props {
+    businessId?: string;
     businessName: string;
     whatsappNumber: string | null;
     currencySymbol: string;
 }
 
-export function FloatingCart({ businessName, whatsappNumber, currencySymbol }: Props) {
+export function FloatingCart({ businessId, businessName, whatsappNumber, currencySymbol }: Props) {
     const { 
         items, wishlist, itemCount, wishlistCount, totalPrice, 
         updateQuantity, removeFromCart, clearCart, 
@@ -46,8 +47,27 @@ export function FloatingCart({ businessName, whatsappNumber, currencySymbol }: P
         setLoading(true);
 
         const itemsList = items.map(i => `- ${i.title} (x${i.quantity}) - ${currencySymbol}${(i.price || 0) * i.quantity}`).join("\n");
+        let orderNumber = "";
+        try {
+            const res = await fetch("/api/orders", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    businessId,
+                    items,
+                    details,
+                    totalAmount: totalPrice
+                })
+            });
+            const data = await res.json();
+            if (data.orderNumber) {
+                orderNumber = data.orderNumber;
+            }
+        } catch (e) { console.error(e); }
+
         const message = [
             `*New Order from ${businessName} website*`,
+            orderNumber ? `*Order Number:* ${orderNumber}` : ``,
             ``,
             `🛒 *Order Summary:*`,
             itemsList,
@@ -60,23 +80,12 @@ export function FloatingCart({ businessName, whatsappNumber, currencySymbol }: P
             `Address: ${details.address}`,
             ``,
             `Please confirm my order. Thank you!`,
-        ].join("\n");
-
-        try {
-            await fetch("/api/inquiries", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    name: details.name,
-                    phone: details.phone,
-                    email: "",
-                    message: `[CART ORDER] \n${itemsList} \n\nAddress: ${details.address}`,
-                })
-            });
-        } catch (e) { console.error(e); }
+        ].filter(Boolean).join("\n");
 
         const waUrl = `https://wa.me/${whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`;
         window.open(waUrl, "_blank");
+        clearCart();
+        setIsDrawerOpen(false);
         setLoading(false);
     };
 

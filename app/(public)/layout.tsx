@@ -114,6 +114,7 @@ export default async function PublicLayout({ children }: { children: React.React
                     />
                     {business.whatsapp && <FloatingWhatsApp phone={business.whatsapp} />}
                     <FloatingCart 
+                        businessId={(business as any).id}
                         businessName={business.name} 
                         whatsappNumber={business.whatsapp}
                         currencySymbol={(business as any).currency_symbol ?? "₹"}
