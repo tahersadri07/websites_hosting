@@ -9,6 +9,8 @@ import { ThemeProvider } from "@/components/public/ThemeProvider";
 import { getTemplate, getTemplateFontUrl } from "@/lib/templates";
 import { Construction } from "lucide-react";
 import { headers } from "next/headers";
+import { CartProvider } from "@/context/CartContext";
+import { FloatingCart } from "@/components/public/FloatingCart";
 
 interface Props {
     children: React.ReactNode;
@@ -87,31 +89,38 @@ export default async function SiteLayout({ children, params }: Props) {
             <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
             <link href={fontUrl} rel="stylesheet" />
 
-            <ThemeProvider template={template}>
-                <div style={{ background: template.colors.bg }} className="flex min-h-screen flex-col">
-                    <Navbar
-                        businessName={business.name}
-                        logoUrl={business.logo_url ?? null}
-                        whatsappNumber={business.whatsapp}
-                        servicesLabel={business.services_label}
-                        siteSlug={isCustomDomain ? null : slug}
-                        template={template}
-                        categories={categories ?? []}
-                    />
-                    <main className="flex-grow">{children}</main>
-                    <Footer
-                        businessName={business.name}
-                        phone={business.phone}
-                        email={business.email}
-                        address={business.address}
-                        whatsapp={business.whatsapp}
-                        socials={socials}
-                        template={template}
-                        siteSlug={isCustomDomain ? null : slug}
-                    />
-                    {business.whatsapp && <FloatingWhatsApp phone={business.whatsapp} />}
-                </div>
-            </ThemeProvider>
+            <CartProvider>
+                <ThemeProvider template={template}>
+                    <div style={{ background: template.colors.bg }} className="flex min-h-screen flex-col">
+                        <Navbar
+                            businessName={business.name}
+                            logoUrl={business.logo_url ?? null}
+                            whatsappNumber={business.whatsapp}
+                            servicesLabel={business.services_label}
+                            siteSlug={isCustomDomain ? null : slug}
+                            template={template}
+                            categories={categories ?? []}
+                        />
+                        <main className="flex-grow">{children}</main>
+                        <Footer
+                            businessName={business.name}
+                            phone={business.phone}
+                            email={business.email}
+                            address={business.address}
+                            whatsapp={business.whatsapp}
+                            socials={socials}
+                            template={template}
+                            siteSlug={isCustomDomain ? null : slug}
+                        />
+                        {business.whatsapp && <FloatingWhatsApp phone={business.whatsapp} />}
+                        <FloatingCart 
+                            businessName={business.name} 
+                            whatsappNumber={business.whatsapp}
+                            currencySymbol={(business as any).currency_symbol ?? "₹"}
+                        />
+                    </div>
+                </ThemeProvider>
+            </CartProvider>
         </NextIntlClientProvider>
     );
 }
