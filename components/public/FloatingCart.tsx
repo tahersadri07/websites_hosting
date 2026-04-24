@@ -26,7 +26,7 @@ interface Props {
     upiId?: string | null;
 }
 
-export function FloatingCart({ businessId, businessName, whatsappNumber, currencySymbol }: Props) {
+export function FloatingCart({ businessId, businessName, whatsappNumber, currencySymbol, upiId }: Props) {
     const { 
         items, wishlist, itemCount, wishlistCount, totalPrice, 
         updateQuantity, removeFromCart, clearCart, 
