@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { 
     Users, Search, UserPlus, Mail, Phone, Calendar, 
     MoreHorizontal, Filter, MessageSquare, Tag,
-    MapPin, Smartphone
+    MapPin, Smartphone, AlertTriangle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,11 +22,14 @@ export default async function CRMPage() {
         .eq("slug", slug)
         .single();
 
-    const { data: customers } = await (supabase as any)
+    const { data: customers, error: crmError } = await (supabase as any)
         .from("customers")
         .select("*")
         .eq("business_id", business?.id)
         .order("created_at", { ascending: false });
+
+    // Handle missing table gracefully (if migration not run yet)
+    const safeCustomers = (crmError && crmError.code === "42P01") ? [] : (customers || []);
 
     return (
         <div className="max-w-6xl space-y-8 pb-12">
@@ -41,7 +44,7 @@ export default async function CRMPage() {
             {/* Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 {[
-                    { label: "Total Customers", value: customers?.length || 0, icon: Users, color: "blue" },
+                    { label: "Total Customers", value: safeCustomers.length, icon: Users, color: "blue" },
                     { label: "Active This Month", value: 0, icon: Calendar, color: "green" },
                     { label: "New Leads", value: 0, icon: Star, color: "orange" },
                 ].map((stat, i) => (
@@ -62,7 +65,17 @@ export default async function CRMPage() {
                 ))}
             </div>
 
-            <CRMList initialCustomers={customers || []} />
+            <CRMList initialCustomers={safeCustomers} />
+
+            {/* Migration Warning if needed */}
+            {crmError && crmError.code === "42P01" && (
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-amber-800 text-sm flex gap-3 items-center">
+                    <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+                    <p>
+                        <b>Action Required:</b> Please run the <code>migration_008_crm.sql</code> in your Supabase SQL editor to enable the CRM features.
+                    </p>
+                </div>
+            )}
 
             {/* CRM Tip */}
             <div className="bg-blue-500/5 rounded-3xl p-6 border border-blue-500/10 flex gap-4 items-center">
