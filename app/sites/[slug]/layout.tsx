@@ -8,6 +8,7 @@ import { FloatingWhatsApp } from "@/components/public/FloatingWhatsApp";
 import { ThemeProvider } from "@/components/public/ThemeProvider";
 import { getTemplate, getTemplateFontUrl } from "@/lib/templates";
 import { Construction } from "lucide-react";
+import { headers } from "next/headers";
 
 interface Props {
     children: React.ReactNode;
@@ -50,6 +51,11 @@ export default async function SiteLayout({ children, params }: Props) {
         db.from("categories").select("id, name, slug").eq("business_id", (await db.from("businesses").select("id").eq("slug", slug).single()).data?.id).order("sort_order")
     ]);
 
+    const headerList = headers();
+    const host = headerList.get("host") || "";
+    const platformHost = process.env.NEXT_PUBLIC_PLATFORM_DOMAIN ?? "localhost:3000";
+    const isCustomDomain = host !== platformHost && !host.endsWith(`.${platformHost}`) && !host.includes("localhost");
+
     if (error || !business) notFound();
 
     if (business.status && business.status !== "active") {
@@ -88,7 +94,7 @@ export default async function SiteLayout({ children, params }: Props) {
                         logoUrl={business.logo_url ?? null}
                         whatsappNumber={business.whatsapp}
                         servicesLabel={business.services_label}
-                        siteSlug={slug}
+                        siteSlug={isCustomDomain ? null : slug}
                         template={template}
                         categories={categories ?? []}
                     />
@@ -101,7 +107,7 @@ export default async function SiteLayout({ children, params }: Props) {
                         whatsapp={business.whatsapp}
                         socials={socials}
                         template={template}
-                        siteSlug={slug}
+                        siteSlug={isCustomDomain ? null : slug}
                     />
                     {business.whatsapp && <FloatingWhatsApp phone={business.whatsapp} />}
                 </div>
