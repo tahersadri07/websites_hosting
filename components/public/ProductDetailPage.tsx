@@ -24,6 +24,8 @@ interface Service {
     item_number?: string | number | null;
     tags?: string[] | null;
     features?: string[] | null;
+    manage_inventory?: boolean;
+    stock_quantity?: number;
 }
 
 interface Props {
@@ -259,23 +261,54 @@ export function ProductDetailPage({ service, business, siteSlug, template, relat
                             ))}
                         </div>
 
+                        {/* Inventory Status */}
+                        {service.manage_inventory && (
+                            <div className="flex items-center gap-2">
+                                {service.stock_quantity! > 0 ? (
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-500/10 text-green-600 border border-green-500/20">
+                                        <CheckCircle2 className="w-3 h-3" />
+                                        In Stock ({service.stock_quantity})
+                                    </span>
+                                ) : (
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-destructive/10 text-destructive border border-destructive/20">
+                                        <Package className="w-3 h-3" />
+                                        Out of Stock
+                                    </span>
+                                )}
+                            </div>
+                        )}
+
                         {/* WhatsApp CTA */}
                         <div className="flex flex-col sm:flex-row gap-3 pt-2">
                             {whatsappUrl ? (
-                                <a
-                                    href={whatsappUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 ${style.heroRadius} font-bold text-base transition-all hover:opacity-90 active:scale-[0.98] shadow-xl`}
-                                    style={{
-                                        background: "linear-gradient(135deg, #22C55E, #16A34A)",
-                                        color: "#fff",
-                                        boxShadow: "0 8px 30px #22c55e30",
-                                    }}
-                                >
-                                    <MessageCircle className="w-5 h-5 fill-current" />
-                                    Order via WhatsApp
-                                </a>
+                                (service.manage_inventory && service.stock_quantity! <= 0) ? (
+                                    <div
+                                        className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 ${style.heroRadius} font-bold text-base opacity-50 cursor-not-allowed`}
+                                        style={{
+                                            background: colors.surface,
+                                            color: colors.textMuted,
+                                            border: `1px solid ${colors.border}`,
+                                        }}
+                                    >
+                                        <Package className="w-5 h-5" />
+                                        Currently Out of Stock
+                                    </div>
+                                ) : (
+                                    <a
+                                        href={whatsappUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 ${style.heroRadius} font-bold text-base transition-all hover:opacity-90 active:scale-[0.98] shadow-xl`}
+                                        style={{
+                                            background: "linear-gradient(135deg, #22C55E, #16A34A)",
+                                            color: "#fff",
+                                            boxShadow: "0 8px 30px #22c55e30",
+                                        }}
+                                    >
+                                        <MessageCircle className="w-5 h-5 fill-current" />
+                                        Order via WhatsApp
+                                    </a>
+                                )
                             ) : (
                                 <div
                                     className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 ${style.heroRadius} font-bold text-base border`}

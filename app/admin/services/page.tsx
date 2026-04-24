@@ -1,7 +1,7 @@
 import { getAdminBusinessSlug } from "@/lib/admin-context";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { Plus, Pencil, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
+import { Plus, Pencil, Trash2, ToggleLeft, ToggleRight, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { deleteService, toggleServiceActive } from "./actions";
@@ -14,7 +14,7 @@ export default async function ServicesAdminPage() {
 
     const { data: business } = await (supabase as any)
         .from("businesses")
-        .select("*") // Get all to avoid specific column errors if migration not run yet
+        .select("*")
         .eq("slug", slug)
         .single();
 
@@ -52,7 +52,7 @@ export default async function ServicesAdminPage() {
                             <tr>
                                 <th className="px-6 py-4 font-semibold">Title</th>
                                 <th className="px-6 py-4 font-semibold hidden md:table-cell">Price</th>
-                                <th className="px-6 py-4 font-semibold hidden md:table-cell">Duration</th>
+                                <th className="px-6 py-4 font-semibold hidden md:table-cell">Inventory</th>
                                 <th className="px-6 py-4 font-semibold">Status</th>
                                 <th className="px-6 py-4 font-semibold text-right">Actions</th>
                             </tr>
@@ -64,8 +64,21 @@ export default async function ServicesAdminPage() {
                                     <td className="px-6 py-4 text-muted-foreground hidden md:table-cell">
                                         {svc.price ? formatCurrency(svc.price) : "—"}
                                     </td>
-                                    <td className="px-6 py-4 text-muted-foreground hidden md:table-cell">
-                                        {svc.duration_minutes ? `${svc.duration_minutes} mins` : "—"}
+                                    <td className="px-6 py-4 hidden md:table-cell">
+                                        {svc.manage_inventory ? (
+                                            <div className="flex items-center gap-2">
+                                                <Package className={cn("w-3.5 h-3.5", svc.stock_quantity <= (svc.low_stock_threshold || 5) ? "text-orange-500" : "text-muted-foreground")} />
+                                                <span className={cn(
+                                                    "font-medium",
+                                                    svc.stock_quantity <= 0 ? "text-destructive" : 
+                                                    svc.stock_quantity <= (svc.low_stock_threshold || 5) ? "text-orange-600" : ""
+                                                )}>
+                                                    {svc.stock_quantity} in stock
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <span className="text-muted-foreground text-xs italic">Not tracked</span>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4">
                                         <form action={toggleServiceActive}>
@@ -111,7 +124,8 @@ export default async function ServicesAdminPage() {
     );
 }
 
-// Local import for missing icon
+import { cn } from "@/lib/utils";
+
 function Scissors({ className }: { className?: string }) {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>

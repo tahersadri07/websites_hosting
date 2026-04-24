@@ -100,6 +100,30 @@ export default async function EditServicePage({ params }: { params: { id: string
                         <Label htmlFor="is_active" className="cursor-pointer">Active (visible to public)</Label>
                     </div>
 
+                    <div className="space-y-6 pt-6 border-t">
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                                <Label className="text-base font-semibold">Inventory Management</Label>
+                                <p className="text-muted-foreground text-xs">Track stock levels and get low-stock alerts.</p>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                                <input type="checkbox" id="manage_inventory" name="manage_inventory" defaultChecked={svc.manage_inventory} className="w-4 h-4 rounded accent-business-primary cursor-pointer" />
+                                <Label htmlFor="manage_inventory" className="cursor-pointer">Enable</Label>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6 opacity-50 pointer-events-none has-[:checked]:opacity-100 has-[:checked]:pointer-events-auto transition-opacity" id="inventory-fields">
+                            <div className="space-y-2">
+                                <Label htmlFor="stock_quantity">Current Stock Quantity</Label>
+                                <Input id="stock_quantity" name="stock_quantity" type="number" min="0" defaultValue={svc.stock_quantity ?? 0} className="h-11 rounded-xl" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="low_stock_threshold">Low Stock Threshold</Label>
+                                <Input id="low_stock_threshold" name="low_stock_threshold" type="number" min="0" defaultValue={svc.low_stock_threshold ?? 5} className="h-11 rounded-xl" />
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="flex items-center justify-end space-x-4 pt-4 border-t">
                         <Link href="/admin/services">
                             <Button type="button" variant="outline" className="rounded-xl">Cancel</Button>
