@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import {
     LayoutDashboard, Layers, Image, Star, MessageSquare,
     Settings, LogOut, Menu, X, ChevronRight, ExternalLink,
-    Users, Package, Calendar, Receipt, BarChart3, Mail, Gift, Megaphone,
     Users, Package, Calendar, Receipt, BarChart3, Mail, Gift, Megaphone, ShoppingBag,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
