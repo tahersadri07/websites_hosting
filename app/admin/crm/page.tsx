@@ -3,15 +3,14 @@ import { createClient } from "@/lib/supabase/server";
 import { 
     Users, Search, UserPlus, Mail, Phone, Calendar, 
     MoreHorizontal, Filter, MessageSquare, Tag,
-    ExternalLink
+    MapPin, Smartphone
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { deleteCustomer } from "./actions";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 import { format } from "date-fns";
+import { CRMList } from "@/components/admin/CRMList";
 
 export default async function CRMPage() {
     const slug = await getAdminBusinessSlug();
@@ -37,10 +36,6 @@ export default async function CRMPage() {
                     <h2 className="text-3xl font-bold tracking-tight">Customer CRM</h2>
                     <p className="text-muted-foreground mt-1">Manage your relationships and track customer history.</p>
                 </div>
-                <Button className="bg-business-primary hover:bg-business-primary/90 rounded-2xl gap-2">
-                    <UserPlus className="w-4 h-4" />
-                    Add Customer
-                </Button>
             </div>
 
             {/* Stats */}
@@ -67,96 +62,7 @@ export default async function CRMPage() {
                 ))}
             </div>
 
-            {/* Search & Filter */}
-            <div className="flex items-center gap-4 bg-background border rounded-2xl p-2 px-4 shadow-sm">
-                <Search className="w-4 h-4 text-muted-foreground" />
-                <input 
-                    placeholder="Search by name, phone, or email..." 
-                    className="flex-grow bg-transparent border-none outline-none text-sm h-10"
-                />
-                <Button variant="ghost" size="sm" className="rounded-xl text-xs gap-2">
-                    <Filter className="w-3 h-3" />
-                    Filters
-                </Button>
-            </div>
-
-            {/* Table */}
-            <div className="bg-background border rounded-3xl overflow-hidden shadow-sm">
-                {(!customers || customers.length === 0) ? (
-                    <div className="py-20 text-center text-muted-foreground">
-                        <Users className="w-12 h-12 mx-auto mb-4 opacity-10" />
-                        <p>No customers found. Start adding your clients!</p>
-                    </div>
-                ) : (
-                    <table className="w-full text-sm">
-                        <thead className="bg-muted/30 border-b text-left">
-                            <tr>
-                                <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Customer</th>
-                                <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Contact Info</th>
-                                <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Added On</th>
-                                <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y">
-                            {customers.map((customer: any) => (
-                                <tr key={customer.id} className="group hover:bg-muted/20 transition-colors">
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-business-primary/10 flex items-center justify-center text-business-primary font-bold">
-                                                {customer.name.charAt(0)}
-                                            </div>
-                                            <div>
-                                                <p className="font-semibold text-sm leading-none">{customer.name}</p>
-                                                <div className="flex gap-1 mt-1">
-                                                    {customer.tags?.map((tag: string) => (
-                                                        <span key={tag} className="text-[9px] px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground font-medium uppercase tracking-tight">
-                                                            {tag}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 space-y-1">
-                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                            <Phone className="w-3 h-3" />
-                                            {customer.phone}
-                                        </div>
-                                        {customer.email && (
-                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                <Mail className="w-3 h-3" />
-                                                {customer.email}
-                                            </div>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <Badge variant="outline" className="text-[10px] bg-green-500/5 text-green-600 border-green-500/20 font-bold uppercase">
-                                            Active
-                                        </Badge>
-                                    </td>
-                                    <td className="px-6 py-4 text-xs text-muted-foreground">
-                                        {format(new Date(customer.created_at), "MMM d, yyyy")}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <Button size="icon" variant="ghost" className="h-8 w-8 rounded-xl hover:bg-green-500/10 hover:text-green-600">
-                                                <MessageSquare className="w-3.5 h-3.5" />
-                                            </Button>
-                                            <form action={deleteCustomer}>
-                                                <input type="hidden" name="id" value={customer.id} />
-                                                <Button type="submit" size="icon" variant="ghost" className="h-8 w-8 rounded-xl hover:bg-red-500/10 hover:text-red-600">
-                                                    <MoreHorizontal className="w-3.5 h-3.5" />
-                                                </Button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                )}
-            </div>
+            <CRMList initialCustomers={customers || []} />
 
             {/* CRM Tip */}
             <div className="bg-blue-500/5 rounded-3xl p-6 border border-blue-500/10 flex gap-4 items-center">

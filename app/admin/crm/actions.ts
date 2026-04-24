@@ -15,7 +15,9 @@ export async function upsertCustomer(formData: FormData) {
         business_id: business?.id,
         name: formData.get("name"),
         phone: formData.get("phone"),
+        whatsapp: formData.get("whatsapp") || formData.get("phone"),
         email: formData.get("email") || null,
+        address: formData.get("address") || null,
         notes: formData.get("notes") || null,
         tags: (formData.get("tags") as string)?.split(",").map(t => t.trim()).filter(Boolean) || [],
     };
