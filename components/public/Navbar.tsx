@@ -16,6 +16,7 @@ interface NavbarProps {
     businessName: string;
     logoUrl?: string | null;
     whatsappNumber?: string | null;
+    servicesLabel?: string | null;
     siteSlug?: string | null;
     template?: TemplateConfig | null;
 }
@@ -38,7 +39,7 @@ export function Navbar({ businessName, logoUrl, whatsappNumber, siteSlug, templa
     const navLinks = [
         { href: `${base}/`,         label: t("home") },
         { href: `${base}/about`,    label: t("about") },
-        { href: `${base}/services`, label: t("services") },
+        { href: `${base}/services`, label: servicesLabel || t("services") },
         { href: `${base}/gallery`,  label: t("gallery") },
         { href: `${base}/contact`,  label: t("contact") },
     ];

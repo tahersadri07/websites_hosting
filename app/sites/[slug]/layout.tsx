@@ -85,6 +85,7 @@ export default async function SiteLayout({ children, params }: Props) {
                         businessName={business.name}
                         logoUrl={business.logo_url ?? null}
                         whatsappNumber={business.whatsapp}
+                        servicesLabel={business.services_label}
                         siteSlug={slug}
                         template={template}
                     />

@@ -141,6 +141,33 @@ export const TEMPLATES: Record<string, TemplateConfig> = {
             navStyle:    "solid",
         },
     },
+
+    // ── 5. Light Elegant ────────────────────────────────────────────────────────
+    "light-elegant": {
+        key: "light-elegant",
+        name: "Light Elegant",
+        description: "Sophisticated light theme with soft shadows and refined typography. Perfect for boutique shops and personal brands.",
+        category: "Boutique & Professional",
+        preview: "linear-gradient(135deg, #FFFFFF 0%, #F3F4F6 50%, #111827 100%)",
+        colors: {
+            primary:   "#111827",
+            secondary: "#4B5563",
+            accent:    "#6366F1",
+            bg:        "#FFFFFF",
+            surface:   "#F9FAFB",
+            border:    "#E5E7EB",
+            text:      "#111827",
+            textMuted: "#6B7280",
+        },
+        fonts: { heading: "Playfair Display", body: "Inter" },
+        style: {
+            heroLayout:  "centered",
+            heroRadius:  "rounded-2xl",
+            cardRadius:  "rounded-3xl",
+            cardShadow:  "shadow-lg shadow-black/5",
+            navStyle:    "glass",
+        },
+    },
 };
 
 export const DEFAULT_TEMPLATE = "dark-minimal";
