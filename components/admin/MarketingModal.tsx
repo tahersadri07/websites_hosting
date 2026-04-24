@@ -44,35 +44,42 @@ export function MarketingModal({ product, templates, isOpen, onClose, siteUrl }:
         setTimeout(() => setCopied(null), 2000);
     };
 
+    const [sharing, setSharing] = useState(false);
+
     const handleWhatsAppShare = () => {
         const url = `https://wa.me/?text=${encodeURIComponent(whatsappMsg)}`;
         window.open(url, "_blank");
     };
 
     const handleSmartShare = async () => {
-        if (!navigator.share) {
-            handleWhatsAppShare();
-            return;
-        }
-
+        setSharing(true);
         try {
-            if (product.thumbnail_url) {
-                // Try to fetch the image and share as file
-                const response = await fetch(product.thumbnail_url);
-                const blob = await response.blob();
-                const file = new File([blob], `${product.slug}.jpg`, { type: blob.type });
+            if (!navigator.share) {
+                handleWhatsAppShare();
+                return;
+            }
 
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    await navigator.share({
-                        title: product.title,
-                        text: whatsappMsg,
-                        files: [file],
-                    });
-                    return;
+            if (product.thumbnail_url) {
+                try {
+                    // Try to fetch image with CORS handling
+                    const response = await fetch(product.thumbnail_url, { mode: 'cors' });
+                    const blob = await response.blob();
+                    const file = new File([blob], `${product.slug}.jpg`, { type: blob.type });
+
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            title: product.title,
+                            text: whatsappMsg,
+                            files: [file],
+                        });
+                        return;
+                    }
+                } catch (imgErr) {
+                    console.warn("Could not share image file, falling back to text", imgErr);
                 }
             }
             
-            // Fallback to text-only share if files not supported
+            // Fallback to text-only share (this still generates a preview on WhatsApp)
             await navigator.share({
                 title: product.title,
                 text: whatsappMsg,
@@ -80,6 +87,8 @@ export function MarketingModal({ product, templates, isOpen, onClose, siteUrl }:
         } catch (error) {
             console.error("Share failed", error);
             handleWhatsAppShare();
+        } finally {
+            setSharing(false);
         }
     };
 
@@ -114,9 +123,14 @@ export function MarketingModal({ product, templates, isOpen, onClose, siteUrl }:
                             variant="outline" 
                             className="w-full rounded-xl text-xs h-10 border-business-primary text-business-primary hover:bg-business-primary/5"
                             onClick={handleSmartShare}
+                            disabled={sharing}
                         >
-                            <ExternalLink className="w-3.5 h-3.5 mr-2" />
-                            Smart Share (Image + Text)
+                            {sharing ? "Processing..." : (
+                                <>
+                                    <ExternalLink className="w-3.5 h-3.5 mr-2" />
+                                    Smart Share (Image + Text)
+                                </>
+                            )}
                         </Button>
                         <p className="text-[10px] text-muted-foreground text-center">
                             Smart Share works best on mobile devices to send both photo and text to WhatsApp.
@@ -136,9 +150,14 @@ export function MarketingModal({ product, templates, isOpen, onClose, siteUrl }:
                                     {copied === "wa" ? <Check className="w-3 h-3 mr-1" /> : <Copy className="w-3 h-3 mr-1" />}
                                     {copied === "wa" ? "Copied" : "Copy"}
                                 </Button>
-                                <Button size="sm" onClick={handleSmartShare} className="h-7 text-[10px] bg-green-600 hover:bg-green-700 text-white rounded-lg">
+                                <Button 
+                                    size="sm" 
+                                    onClick={handleSmartShare} 
+                                    disabled={sharing}
+                                    className="h-7 text-[10px] bg-green-600 hover:bg-green-700 text-white rounded-lg"
+                                >
                                     <MessageCircle className="w-3 h-3 mr-1" />
-                                    Direct Share
+                                    {sharing ? "..." : "Direct Share"}
                                 </Button>
                             </div>
                         </div>
