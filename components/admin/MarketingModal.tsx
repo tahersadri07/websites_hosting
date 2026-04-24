@@ -49,6 +49,40 @@ export function MarketingModal({ product, templates, isOpen, onClose, siteUrl }:
         window.open(url, "_blank");
     };
 
+    const handleSmartShare = async () => {
+        if (!navigator.share) {
+            handleWhatsAppShare();
+            return;
+        }
+
+        try {
+            if (product.thumbnail_url) {
+                // Try to fetch the image and share as file
+                const response = await fetch(product.thumbnail_url);
+                const blob = await response.blob();
+                const file = new File([blob], `${product.slug}.jpg`, { type: blob.type });
+
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        title: product.title,
+                        text: whatsappMsg,
+                        files: [file],
+                    });
+                    return;
+                }
+            }
+            
+            // Fallback to text-only share if files not supported
+            await navigator.share({
+                title: product.title,
+                text: whatsappMsg,
+            });
+        } catch (error) {
+            console.error("Share failed", error);
+            handleWhatsAppShare();
+        }
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={(v) => !v && onClose()}>
             <DialogContent className="max-w-2xl rounded-3xl">
@@ -78,21 +112,14 @@ export function MarketingModal({ product, templates, isOpen, onClose, siteUrl }:
                         </div>
                         <Button 
                             variant="outline" 
-                            className="w-full rounded-xl text-xs h-10"
-                            onClick={() => {
-                                const link = document.createElement('a');
-                                link.href = product.thumbnail_url;
-                                link.download = `${product.slug}.jpg`;
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-                            }}
-                            disabled={!product.thumbnail_url}
+                            className="w-full rounded-xl text-xs h-10 border-business-primary text-business-primary hover:bg-business-primary/5"
+                            onClick={handleSmartShare}
                         >
-                            Download Image
+                            <ExternalLink className="w-3.5 h-3.5 mr-2" />
+                            Smart Share (Image + Text)
                         </Button>
                         <p className="text-[10px] text-muted-foreground text-center">
-                            Download this photo to upload it manually on Instagram.
+                            Smart Share works best on mobile devices to send both photo and text to WhatsApp.
                         </p>
                     </div>
 
@@ -109,9 +136,9 @@ export function MarketingModal({ product, templates, isOpen, onClose, siteUrl }:
                                     {copied === "wa" ? <Check className="w-3 h-3 mr-1" /> : <Copy className="w-3 h-3 mr-1" />}
                                     {copied === "wa" ? "Copied" : "Copy"}
                                 </Button>
-                                <Button size="sm" onClick={handleWhatsAppShare} className="h-7 text-[10px] bg-green-600 hover:bg-green-700 text-white rounded-lg">
-                                    <ExternalLink className="w-3 h-3 mr-1" />
-                                    Share to WhatsApp
+                                <Button size="sm" onClick={handleSmartShare} className="h-7 text-[10px] bg-green-600 hover:bg-green-700 text-white rounded-lg">
+                                    <MessageCircle className="w-3 h-3 mr-1" />
+                                    Direct Share
                                 </Button>
                             </div>
                         </div>
