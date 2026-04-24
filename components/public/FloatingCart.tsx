@@ -202,7 +202,7 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
                                         ))}
                                     </div>
                                 )
-                            ) : (
+                            ) : step === "details" ? (
                                 <div className="space-y-5">
                                     <div className="space-y-2">
                                         <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Full Name</Label>
