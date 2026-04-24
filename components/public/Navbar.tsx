@@ -63,7 +63,7 @@ export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, s
         )}>
             <div className="container mx-auto px-6 flex items-center justify-between max-w-7xl">
                 {/* Logo */}
-                <Link href="/" className="flex items-center gap-2.5">
+                <Link href={base || "/"} className="flex items-center gap-2.5">
                     {logoUrl ? (
                         <Image src={logoUrl} alt={businessName} width={140} height={40}
                             className="h-9 w-auto object-contain" unoptimized />

@@ -16,13 +16,7 @@ interface FooterProps {
     siteSlug?: string | null;
 }
 
-const navLinks = [
-    { href: "/",         label: "Home" },
-    { href: "/services", label: "Services" },
-    { href: "/gallery",  label: "Gallery" },
-    { href: "/about",    label: "About" },
-    { href: "/contact",  label: "Contact" },
-];
+
 
 export function Footer({ businessName, phone, email, address, whatsapp, socials, template, siteSlug }: FooterProps) {
     const year = new Date().getFullYear();
@@ -40,7 +34,9 @@ export function Footer({ businessName, phone, email, address, whatsapp, socials,
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
                     {/* Brand */}
                     <div className="space-y-4">
-                        <h3 style={{ color: text }} className="text-base font-bold">{businessName}</h3>
+                        <Link href={base || "/"}>
+                            <h3 style={{ color: text }} className="text-base font-bold hover:opacity-80 transition-opacity">{businessName}</h3>
+                        </Link>
                         <p style={{ color: textMuted }} className="text-sm leading-relaxed max-w-xs">
                             Providing quality services to our valued customers.
                         </p>
@@ -116,8 +112,8 @@ export function Footer({ businessName, phone, email, address, whatsapp, socials,
                 <div style={{ borderColor: border }} className="border-t pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <p style={{ color: textMuted }} className="text-xs">© {year} {businessName}. All rights reserved.</p>
                     <div className="flex items-center gap-4">
-                        <Link href="/privacy" style={{ color: textMuted }} className="text-xs hover:opacity-80 transition-opacity">Privacy</Link>
-                        <Link href="/terms"   style={{ color: textMuted }} className="text-xs hover:opacity-80 transition-opacity">Terms</Link>
+                        <Link href={`${base}/privacy`} style={{ color: textMuted }} className="text-xs hover:opacity-80 transition-opacity">Privacy</Link>
+                        <Link href={`${base}/terms`}   style={{ color: textMuted }} className="text-xs hover:opacity-80 transition-opacity">Terms</Link>
                     </div>
                 </div>
             </div>
