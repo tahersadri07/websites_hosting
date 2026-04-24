@@ -6,7 +6,7 @@ import { X, ZoomIn, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface GalleryImage {
     id: string;
-    image_url: string;
+    url: string;
     caption: string | null;
     alt_text: string | null;
 }
@@ -21,7 +21,7 @@ export function GallerySection({ images, limit }: { images: GalleryImage[]; limi
     const next = () => setLightboxIdx(i => i !== null ? (i + 1) % display.length : null);
 
     return (
-        <section className="py-24 bg-[#13131A] border-y border-[#27272A] relative overflow-hidden">
+        <section className="py-24 relative overflow-hidden">
             {/* Glow */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-indigo-600/6 rounded-full blur-[80px] pointer-events-none" />
 
@@ -33,7 +33,7 @@ export function GallerySection({ images, limit }: { images: GalleryImage[]; limi
                             <span className="w-4 h-px bg-blue-400" />
                             Our Work
                         </div>
-                        <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">Gallery</h2>
+                        <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Gallery</h2>
                     </div>
                     {limit && images.length > limit && (
                         <span className="text-xs text-zinc-600">{images.length} photos</span>
@@ -50,7 +50,7 @@ export function GallerySection({ images, limit }: { images: GalleryImage[]; limi
                                 ${i === 0 ? "col-span-2 row-span-2 aspect-square" : "aspect-square"}`}
                         >
                             <Image
-                                src={img.image_url} alt={img.alt_text ?? img.caption ?? "Gallery"}
+                                src={img.url} alt={img.alt_text ?? img.caption ?? "Gallery"}
                                 fill className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                                 unoptimized
                             />
@@ -90,7 +90,7 @@ export function GallerySection({ images, limit }: { images: GalleryImage[]; limi
 
                     <div className="relative max-w-4xl max-h-[80vh] w-full h-full" onClick={e => e.stopPropagation()}>
                         <Image
-                            src={display[lightboxIdx].image_url}
+                            src={display[lightboxIdx].url}
                             alt={display[lightboxIdx].alt_text ?? ""}
                             fill className="object-contain rounded-xl"
                             unoptimized
