@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import type { TemplateConfig } from "@/lib/templates";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface Service {
     id: string;
