@@ -38,7 +38,7 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
     
     const [step, setStep] = useState<"review" | "details" | "payment">("review");
     const [details, setDetails] = useState({ name: "", phone: "", address: "" });
-    const [paymentMethod, setPaymentMethod] = useState<"cash" | "upi">("cash");
+    const [paymentMethod, setPaymentMethod] = useState<"cash" | "manual_upi" | "razorpay">("cash");
     const [transactionId, setTransactionId] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -167,7 +167,7 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
             `Phone: ${details.phone}`,
             `Address: ${details.address}`,
             ``,
-            `💳 *Payment Method:* ${paymentMethod === 'upi' ? 'Paid via UPI/GPay' : 'Cash / Pay Later'}`,
+            `💳 *Payment Method:* ${paymentMethod === 'manual_upi' ? 'Manual UPI/GPay' : paymentMethod === 'razorpay' ? 'Paid Online' : 'Cash / Pay Later'}`,
             transactionId ? `*Transaction ID:* ${transactionId}` : ``,
             ``,
             `Please confirm my order. Thank you!`,
@@ -318,12 +318,25 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
                                                 <span className="text-[10px]">Cash or Transfer later</span>
                                             </button>
                                             
-                                            {onlinePaymentsEnabled ? (
+                                            {upiId ? (
                                                 <button 
-                                                    onClick={() => setPaymentMethod("upi")}
+                                                    onClick={() => setPaymentMethod("manual_upi")}
                                                     className={cn(
                                                         "p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 text-center",
-                                                        paymentMethod === "upi" ? "border-business-primary bg-business-primary/5 text-business-primary" : "border-transparent bg-background text-zinc-500 hover:bg-muted"
+                                                        paymentMethod === "manual_upi" ? "border-business-primary bg-business-primary/5 text-business-primary" : "border-transparent bg-background text-zinc-500 hover:bg-muted"
+                                                    )}
+                                                >
+                                                    <span className="font-bold text-sm">Manual UPI</span>
+                                                    <span className="text-[10px]">Scan & enter UTR</span>
+                                                </button>
+                                            ) : null}
+                                            
+                                            {onlinePaymentsEnabled ? (
+                                                <button 
+                                                    onClick={() => setPaymentMethod("razorpay")}
+                                                    className={cn(
+                                                        "p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 text-center",
+                                                        paymentMethod === "razorpay" ? "border-business-primary bg-business-primary/5 text-business-primary" : "border-transparent bg-background text-zinc-500 hover:bg-muted"
                                                     )}
                                                 >
                                                     <span className="font-bold text-sm">Pay Online</span>
@@ -338,7 +351,42 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
                                         </div>
                                     </div>
 
-                                    {paymentMethod === "upi" && (
+                                    {paymentMethod === "manual_upi" && upiId && (
+                                        <div className="space-y-4 animate-in fade-in slide-in-from-top-4">
+                                            <div className="p-5 rounded-2xl bg-[#0A0A0F] border border-[#27272A] text-center flex flex-col items-center">
+                                                <p className="text-sm text-zinc-400 mb-4">Pay directly via your UPI app (GPay, PhonePe, Paytm)</p>
+                                                
+                                                {/* Dynamic QR Code */}
+                                                <div className="bg-white p-2 rounded-xl mb-4 w-40 h-40">
+                                                    <img 
+                                                        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`upi://pay?pa=${upiId}&pn=${encodeURIComponent(businessName)}&am=${totalPrice}&cu=INR`)}`}
+                                                        alt="UPI QR Code"
+                                                        className="w-full h-full object-contain"
+                                                    />
+                                                </div>
+
+                                                <a 
+                                                    href={`upi://pay?pa=${upiId}&pn=${encodeURIComponent(businessName)}&am=${totalPrice}&cu=INR`}
+                                                    className="inline-flex items-center justify-center w-full h-12 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold shadow-lg shadow-blue-500/20 mb-2"
+                                                >
+                                                    Click to Pay {currencySymbol}{totalPrice}
+                                                </a>
+                                                <p className="text-[10px] text-zinc-500">Scan QR or use UPI ID manually:<br/><strong className="text-zinc-300">{upiId}</strong></p>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Transaction ID (Required)</Label>
+                                                <Input 
+                                                    value={transactionId} 
+                                                    onChange={(e) => setTransactionId(e.target.value)} 
+                                                    placeholder="Enter 12-digit UTR / Ref No." 
+                                                    className="h-12 rounded-xl bg-background border-border" 
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {paymentMethod === "razorpay" && (
                                         <div className="space-y-4 animate-in fade-in slide-in-from-top-4">
                                             <div className="p-5 rounded-2xl bg-[#0A0A0F] border border-[#27272A] text-center flex flex-col items-center">
                                                 <p className="text-sm text-zinc-400 mb-4">Pay securely with Credit/Debit Card, UPI, Netbanking, or Wallets.</p>
@@ -428,7 +476,8 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
                                 ) : (
                                     <div className="flex gap-3">
                                         <Button variant="outline" onClick={() => setStep("details")} className="h-14 rounded-2xl px-6">Back</Button>
-                                        {paymentMethod === "cash" ? (
+                                        
+                                        {paymentMethod === "cash" && (
                                             <Button 
                                                 disabled={loading}
                                                 onClick={handleCheckout}
@@ -437,7 +486,20 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
                                                 <Send className="w-5 h-5 mr-2" />
                                                 {loading ? "Ordering..." : "Confirm Pay Later"}
                                             </Button>
-                                        ) : (
+                                        )}
+                                        
+                                        {paymentMethod === "manual_upi" && (
+                                            <Button 
+                                                disabled={loading || transactionId.trim().length < 4}
+                                                onClick={handleCheckout}
+                                                className="flex-grow h-14 rounded-2xl text-base font-bold bg-[#25D366] hover:bg-[#20bd5c] text-white shadow-lg shadow-[#25D366]/20"
+                                            >
+                                                <Send className="w-5 h-5 mr-2" />
+                                                {loading ? "Ordering..." : "Confirm via WhatsApp"}
+                                            </Button>
+                                        )}
+                                        
+                                        {paymentMethod === "razorpay" && (
                                             <Button 
                                                 disabled={loading}
                                                 onClick={handleRazorpayCheckout}
