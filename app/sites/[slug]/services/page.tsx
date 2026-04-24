@@ -2,6 +2,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { ServicesGrid } from "@/components/public/ServicesGrid";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
     const db = createServiceClient();
@@ -58,12 +59,14 @@ export default async function SiteServicesPage({ params }: { params: { slug: str
                         Browse everything {business.name} has to offer — click any item to view details &amp; order via WhatsApp.
                     </p>
                 </div>
-                <ServicesGrid
-                    services={(services as any[]) ?? []}
-                    categories={(categories as any[]) ?? []}
-                    currencySymbol={(business as any).currency_symbol}
-                    siteSlug={params.slug}
-                />
+                <Suspense fallback={<div className="py-20 text-center opacity-50">Loading services...</div>}>
+                    <ServicesGrid
+                        services={(services as any[]) ?? []}
+                        categories={(categories as any[]) ?? []}
+                        currencySymbol={(business as any).currency_symbol}
+                        siteSlug={params.slug}
+                    />
+                </Suspense>
             </div>
         </div>
     );
