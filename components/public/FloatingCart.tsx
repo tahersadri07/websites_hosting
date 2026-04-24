@@ -25,9 +25,10 @@ interface Props {
     whatsappNumber: string | null;
     currencySymbol: string;
     upiId?: string | null;
+    onlinePaymentsEnabled?: boolean;
 }
 
-export function FloatingCart({ businessId, businessName, whatsappNumber, currencySymbol, upiId }: Props) {
+export function FloatingCart({ businessId, businessName, whatsappNumber, currencySymbol, upiId, onlinePaymentsEnabled = true }: Props) {
     const { 
         items, wishlist, itemCount, wishlistCount, totalPrice, 
         updateQuantity, removeFromCart, clearCart, 
@@ -317,16 +318,23 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
                                                 <span className="text-[10px]">Cash or Transfer later</span>
                                             </button>
                                             
-                                            <button 
-                                                onClick={() => setPaymentMethod("upi")}
-                                                className={cn(
-                                                    "p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 text-center",
-                                                    paymentMethod === "upi" ? "border-business-primary bg-business-primary/5 text-business-primary" : "border-transparent bg-background text-zinc-500 hover:bg-muted"
-                                                )}
-                                            >
-                                                <span className="font-bold text-sm">Pay Online</span>
-                                                <span className="text-[10px]">Cards, UPI, Wallets</span>
-                                            </button>
+                                            {onlinePaymentsEnabled ? (
+                                                <button 
+                                                    onClick={() => setPaymentMethod("upi")}
+                                                    className={cn(
+                                                        "p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 text-center",
+                                                        paymentMethod === "upi" ? "border-business-primary bg-business-primary/5 text-business-primary" : "border-transparent bg-background text-zinc-500 hover:bg-muted"
+                                                    )}
+                                                >
+                                                    <span className="font-bold text-sm">Pay Online</span>
+                                                    <span className="text-[10px]">Cards, UPI, Wallets</span>
+                                                </button>
+                                            ) : (
+                                                <div className="p-4 rounded-xl border-2 border-transparent bg-background opacity-50 flex flex-col items-center gap-2 text-center cursor-not-allowed">
+                                                    <span className="font-bold text-sm text-zinc-500">Pay Online</span>
+                                                    <span className="text-[10px] text-zinc-500">Not enabled</span>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
 
