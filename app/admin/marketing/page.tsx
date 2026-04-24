@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Megaphone, Save, Info, MessageCircle, Instagram } from "lucide-react";
+import { Megaphone, Save, Info, MessageCircle, Camera } from "lucide-react";
 import { updateMarketingTemplates } from "./actions";
 
 export default async function MarketingAdminPage() {
@@ -62,7 +62,7 @@ export default async function MarketingAdminPage() {
                 {/* Instagram Post */}
                 <div className="space-y-4 bg-background border rounded-2xl p-6">
                     <div className="flex items-center gap-2 text-pink-600 font-bold">
-                        <Instagram className="w-5 h-5" />
+                        <Camera className="w-5 h-5" />
                         Instagram Post Template
                     </div>
                     <Textarea 
@@ -76,7 +76,7 @@ export default async function MarketingAdminPage() {
                 {/* Instagram Story */}
                 <div className="space-y-4 bg-background border rounded-2xl p-6">
                     <div className="flex items-center gap-2 text-purple-600 font-bold">
-                        <Instagram className="w-5 h-5" />
+                        <Camera className="w-5 h-5" />
                         Instagram Story / Quick Share Template
                     </div>
                     <Textarea 

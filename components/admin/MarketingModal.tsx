@@ -5,7 +5,7 @@ import {
     Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription 
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Instagram, Copy, Check, Megaphone, ExternalLink } from "lucide-react";
+import { MessageCircle, Camera, Copy, Check, Megaphone, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -62,7 +62,41 @@ export function MarketingModal({ product, templates, isOpen, onClose, siteUrl }:
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-6 py-4">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 py-4">
+                    {/* Image Preview & Actions */}
+                    <div className="md:col-span-4 space-y-4">
+                        <div className="aspect-square rounded-2xl overflow-hidden border bg-muted flex items-center justify-center relative group">
+                            {product.thumbnail_url ? (
+                                <img 
+                                    src={product.thumbnail_url} 
+                                    alt={product.title} 
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <Camera className="w-12 h-12 text-muted-foreground/20" />
+                            )}
+                        </div>
+                        <Button 
+                            variant="outline" 
+                            className="w-full rounded-xl text-xs h-10"
+                            onClick={() => {
+                                const link = document.createElement('a');
+                                link.href = product.thumbnail_url;
+                                link.download = `${product.slug}.jpg`;
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                            }}
+                            disabled={!product.thumbnail_url}
+                        >
+                            Download Image
+                        </Button>
+                        <p className="text-[10px] text-muted-foreground text-center">
+                            Download this photo to upload it manually on Instagram.
+                        </p>
+                    </div>
+
+                    <div className="md:col-span-8 space-y-6 overflow-y-auto max-h-[60vh] pr-2">
                     {/* WhatsApp */}
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
@@ -90,7 +124,7 @@ export function MarketingModal({ product, templates, isOpen, onClose, siteUrl }:
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
                             <label className="text-xs font-bold text-pink-600 flex items-center gap-1.5 uppercase tracking-wider">
-                                <Instagram className="w-3.5 h-3.5" />
+                                <Camera className="w-3.5 h-3.5" />
                                 Instagram Post Caption
                             </label>
                             <Button size="sm" variant="ghost" onClick={() => handleCopy(instaPostMsg, "post")} className="h-7 text-[10px] rounded-lg">
@@ -107,7 +141,7 @@ export function MarketingModal({ product, templates, isOpen, onClose, siteUrl }:
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
                             <label className="text-xs font-bold text-purple-600 flex items-center gap-1.5 uppercase tracking-wider">
-                                <Instagram className="w-3.5 h-3.5" />
+                                <Camera className="w-3.5 h-3.5" />
                                 Instagram Story Text
                             </label>
                             <Button size="sm" variant="ghost" onClick={() => handleCopy(instaStoryMsg, "story")} className="h-7 text-[10px] rounded-lg">
@@ -118,6 +152,7 @@ export function MarketingModal({ product, templates, isOpen, onClose, siteUrl }:
                         <div className="bg-muted/50 p-4 rounded-2xl text-sm font-mono whitespace-pre-wrap border border-muted">
                             {instaStoryMsg}
                         </div>
+                    </div>
                     </div>
                 </div>
 
