@@ -98,6 +98,7 @@ export default async function SiteLayout({ children, params }: Props) {
                         whatsapp={business.whatsapp}
                         socials={socials}
                         template={template}
+                        siteSlug={slug}
                     />
                     {business.whatsapp && <FloatingWhatsApp phone={business.whatsapp} />}
                 </div>
