@@ -7,6 +7,7 @@ import {
     CheckCircle2, ShoppingBag, Share2, Star,
     Package, Sparkles, Tag
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { TemplateConfig } from "@/lib/templates";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
