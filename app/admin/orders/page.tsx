@@ -1,27 +1,26 @@
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { OrdersList } from "@/components/admin/OrdersList";
+import { getAdminBusinessSlug } from "@/lib/admin-context";
 
 export default async function OrdersPage() {
-    const supabase = createServiceClient();
+    const slug = await getAdminBusinessSlug();
+    const supabase = await createClient();
     
     // Get business mapping
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) redirect("/login");
-
-    const { data: member } = await supabase
-        .from("business_members")
-        .select("business_id, role")
-        .eq("user_id", userData.user.id)
+    const { data: business } = await (supabase as any)
+        .from("businesses")
+        .select("id")
+        .eq("slug", slug)
         .single();
 
-    if (!member) redirect("/admin/setup");
+    if (!business) redirect("/admin/setup");
 
     // Fetch initial orders
-    const { data: orders, error } = await supabase
+    const { data: orders, error } = await (supabase as any)
         .from("orders")
         .select("*")
-        .eq("business_id", member.business_id)
+        .eq("business_id", business.id)
         .order("created_at", { ascending: false });
 
     // Fallback if the migration hasn't been run yet to avoid hard crash
@@ -43,7 +42,7 @@ export default async function OrdersPage() {
                 <p className="text-zinc-400">Manage customer orders and track their delivery status.</p>
             </div>
             
-            <OrdersList initialOrders={orders || []} businessId={member.business_id} />
+            <OrdersList initialOrders={orders || []} businessId={business.id} />
         </div>
     );
 }
