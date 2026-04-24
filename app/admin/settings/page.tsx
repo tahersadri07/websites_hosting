@@ -64,6 +64,23 @@ export default async function SettingsPage() {
                         <Label htmlFor="upi_id">UPI ID (for payments)</Label>
                         <Input id="upi_id" name="upi_id" defaultValue={(b as any).upi_id ?? ""} placeholder="e.g. yourname@okicici" className="h-11 rounded-xl" />
                     </div>
+
+                    {/* Payment Gateways */}
+                    <div className="bg-muted/30 p-5 rounded-2xl border border-border mt-6 space-y-4">
+                        <h4 className="font-bold text-sm mb-2">Automated Payment Gateway (Razorpay)</h4>
+                        <p className="text-xs text-muted-foreground mb-4">Enter your Razorpay API keys to automatically accept and verify GPay, PhonePe, Cards, and more.</p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <Label htmlFor="razorpay_key_id">Razorpay Key ID</Label>
+                                <Input id="razorpay_key_id" name="razorpay_key_id" defaultValue={(b as any).razorpay_key_id ?? ""} placeholder="rzp_test_..." className="h-11 rounded-xl bg-background" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="razorpay_key_secret">Razorpay Key Secret</Label>
+                                <Input id="razorpay_key_secret" name="razorpay_key_secret" type="password" defaultValue={(b as any).razorpay_key_secret ?? ""} placeholder="Secret key..." className="h-11 rounded-xl bg-background" />
+                            </div>
+                        </div>
+                    </div>
                     <div className="space-y-2">
                         <Label htmlFor="email">Email</Label>
                         <Input id="email" name="email" type="email" defaultValue={b.email ?? ""} className="h-11 rounded-xl" />

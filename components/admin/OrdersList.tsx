@@ -20,6 +20,7 @@ interface Order {
     customer_details: any;
     payment_method: string;
     transaction_id: string | null;
+    gateway_payment_id: string | null;
     created_at: string;
 }
 
@@ -147,12 +148,12 @@ export function OrdersList({ initialOrders, businessId }: Props) {
                                     <div className="flex flex-col items-end mt-1 text-xs">
                                         <Badge variant="outline" className={cn(
                                             "mb-1",
-                                            order.payment_method === 'upi' ? "border-blue-500/30 text-blue-400 bg-blue-500/5" : "border-zinc-700 text-zinc-400 bg-zinc-800"
+                                            (order.payment_method === 'upi' || order.payment_method === 'razorpay') ? "border-blue-500/30 text-blue-400 bg-blue-500/5" : "border-zinc-700 text-zinc-400 bg-zinc-800"
                                         )}>
-                                            {order.payment_method === 'upi' ? 'Paid via UPI' : 'Cash / Pay Later'}
+                                            {order.payment_method === 'razorpay' ? 'Paid via Gateway' : order.payment_method === 'upi' ? 'Paid via UPI' : 'Cash / Pay Later'}
                                         </Badge>
-                                        {order.transaction_id && (
-                                            <span className="text-[10px] text-zinc-500 font-mono">TXN: {order.transaction_id}</span>
+                                        {(order.transaction_id || order.gateway_payment_id) && (
+                                            <span className="text-[10px] text-zinc-500 font-mono">TXN: {order.gateway_payment_id || order.transaction_id}</span>
                                         )}
                                     </div>
                                 </div>
