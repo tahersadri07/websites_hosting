@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Megaphone, Save, Info, MessageCircle, Instagram } from "lucide-react";
+import { Megaphone, Save, Info, MessageCircle, Camera } from "lucide-react";
 import { updateMarketingTemplates } from "./actions";
 
 export default async function MarketingAdminPage() {
@@ -53,7 +53,7 @@ export default async function MarketingAdminPage() {
                     </div>
                     <Textarea 
                         name="marketing_whatsapp_template"
-                        defaultValue={business.marketing_whatsapp_template}
+                        defaultValue={business.marketing_whatsapp_template || 'Check out our latest product: *{{name}}*! \n\n💰 Price: {{price}}\n📝 Details: {{description}}\n\n🔗 View more: {{link}}'}
                         placeholder="Draft your WhatsApp message here..."
                         className="min-h-[120px] font-mono text-sm rounded-xl"
                     />
@@ -62,12 +62,12 @@ export default async function MarketingAdminPage() {
                 {/* Instagram Post */}
                 <div className="space-y-4 bg-background border rounded-2xl p-6">
                     <div className="flex items-center gap-2 text-pink-600 font-bold">
-                        <Instagram className="w-5 h-5" />
+                        <Camera className="w-5 h-5" />
                         Instagram Post Template
                     </div>
                     <Textarea 
                         name="marketing_insta_post_template"
-                        defaultValue={business.marketing_insta_post_template}
+                        defaultValue={business.marketing_insta_post_template || 'New Arrival: {{name}} ✨\n\n{{description}}\n\nPrice: {{price}}\nTap the link in our bio to order! 🛍️'}
                         placeholder="Draft your Instagram post caption here..."
                         className="min-h-[120px] font-mono text-sm rounded-xl"
                     />
@@ -76,12 +76,12 @@ export default async function MarketingAdminPage() {
                 {/* Instagram Story */}
                 <div className="space-y-4 bg-background border rounded-2xl p-6">
                     <div className="flex items-center gap-2 text-purple-600 font-bold">
-                        <Instagram className="w-5 h-5" />
+                        <Camera className="w-5 h-5" />
                         Instagram Story / Quick Share Template
                     </div>
                     <Textarea 
                         name="marketing_insta_story_template"
-                        defaultValue={business.marketing_insta_story_template}
+                        defaultValue={business.marketing_insta_story_template || '✨ NEW: {{name}} ✨ \nNow available for {{price}}!'}
                         placeholder="Draft your Story text here..."
                         className="min-h-[100px] font-mono text-sm rounded-xl"
                     />

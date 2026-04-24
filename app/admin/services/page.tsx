@@ -13,7 +13,10 @@ export default async function ServicesAdminPage() {
     const supabase = await createClient();
 
     const { data: business } = await (supabase as any)
-        .from("businesses").select("id, slug, marketing_whatsapp_template, marketing_insta_post_template, marketing_insta_story_template").eq("slug", slug).single();
+        .from("businesses")
+        .select("*") // Get all to avoid specific column errors if migration not run yet
+        .eq("slug", slug)
+        .single();
 
     const { data: services } = await (supabase as any)
         .from("services")
