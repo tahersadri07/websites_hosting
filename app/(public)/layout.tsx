@@ -68,6 +68,8 @@ function MaintenancePage({ name, message, status }: { name: string; message?: st
     );
 }
 
+import { CartProvider } from "@/context/CartContext";
+
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
     const [{ business }, locale, messages] = await Promise.all([
         getBusinessData(),
@@ -93,24 +95,33 @@ export default async function PublicLayout({ children }: { children: React.React
         youtube:   (business as any).youtube_url   ?? null,
     };
 
+import { FloatingCart } from "@/components/public/FloatingCart";
+
     return (
         <NextIntlClientProvider locale={locale} messages={messages}>
-            <div className="flex min-h-screen flex-col">
-                <Navbar
-                    businessName={business.name}
-                    logoUrl={(business as any).logo_url ?? null}
-                    whatsappNumber={business.whatsapp}
-                />
-                <main className="flex-grow">{children}</main>
-                <Footer
-                    businessName={business.name}
-                    phone={business.phone}
-                    email={business.email}
-                    address={business.address}
-                    socials={socials}
-                />
-                {business.whatsapp && <FloatingWhatsApp phone={business.whatsapp} />}
-            </div>
+            <CartProvider>
+                <div className="flex min-h-screen flex-col">
+                    <Navbar
+                        businessName={business.name}
+                        logoUrl={(business as any).logo_url ?? null}
+                        whatsappNumber={business.whatsapp}
+                    />
+                    <main className="flex-grow">{children}</main>
+                    <Footer
+                        businessName={business.name}
+                        phone={business.phone}
+                        email={business.email}
+                        address={business.address}
+                        socials={socials}
+                    />
+                    {business.whatsapp && <FloatingWhatsApp phone={business.whatsapp} />}
+                    <FloatingCart 
+                        businessName={business.name} 
+                        whatsappNumber={business.whatsapp}
+                        currencySymbol={(business as any).currency_symbol ?? "₹"}
+                    />
+                </div>
+            </CartProvider>
         </NextIntlClientProvider>
     );
 }

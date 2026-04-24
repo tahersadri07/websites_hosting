@@ -10,6 +10,7 @@ import {
 import type { TemplateConfig } from "@/lib/templates";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/context/CartContext";
 
 interface Service {
     id: string;
@@ -279,11 +280,11 @@ export function ProductDetailPage({ service, business, siteSlug, template, relat
                         )}
 
                         {/* WhatsApp CTA */}
-                        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                        <div className="flex flex-col gap-3 pt-2">
                             {whatsappUrl ? (
                                 (service.manage_inventory && service.stock_quantity! <= 0) ? (
                                     <div
-                                        className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 ${style.heroRadius} font-bold text-base opacity-50 cursor-not-allowed`}
+                                        className={`w-full flex items-center justify-center gap-3 px-6 py-4 ${style.heroRadius} font-bold text-base opacity-50 cursor-not-allowed`}
                                         style={{
                                             background: colors.surface,
                                             color: colors.textMuted,
@@ -294,24 +295,44 @@ export function ProductDetailPage({ service, business, siteSlug, template, relat
                                         Currently Out of Stock
                                     </div>
                                 ) : (
-                                    <a
-                                        href={whatsappUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 ${style.heroRadius} font-bold text-base transition-all hover:opacity-90 active:scale-[0.98] shadow-xl`}
-                                        style={{
-                                            background: "linear-gradient(135deg, #22C55E, #16A34A)",
-                                            color: "#fff",
-                                            boxShadow: "0 8px 30px #22c55e30",
-                                        }}
-                                    >
-                                        <MessageCircle className="w-5 h-5 fill-current" />
-                                        Order via WhatsApp
-                                    </a>
+                                    <div className="flex flex-col sm:flex-row gap-3">
+                                        <Button 
+                                            onClick={() => addToCart({
+                                                id: service.id,
+                                                slug: service.slug,
+                                                title: service.title,
+                                                price: service.price,
+                                                thumbnail_url: service.thumbnail_url,
+                                                quantity: 1
+                                            })}
+                                            className={`flex-1 flex items-center justify-center gap-3 px-6 py-7 ${style.heroRadius} font-bold text-base transition-all hover:opacity-90 active:scale-[0.98] shadow-xl`}
+                                            style={{
+                                                background: colors.primary,
+                                                color: "#fff",
+                                                boxShadow: `0 8px 30px ${colors.primary}30`,
+                                            }}
+                                        >
+                                            <ShoppingBag className="w-5 h-5" />
+                                            Add to Cart
+                                        </Button>
+                                        <a
+                                            href={whatsappUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className={`flex-1 flex items-center justify-center gap-3 px-6 py-7 ${style.heroRadius} font-bold text-base transition-all hover:opacity-90 active:scale-[0.98] border border-green-500/30`}
+                                            style={{
+                                                background: "#25D36610",
+                                                color: "#16A34A",
+                                            }}
+                                        >
+                                            <MessageCircle className="w-5 h-5 fill-current" />
+                                            Direct WhatsApp
+                                        </a>
+                                    </div>
                                 )
                             ) : (
                                 <div
-                                    className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 ${style.heroRadius} font-bold text-base border`}
+                                    className={`w-full flex items-center justify-center gap-3 px-6 py-4 ${style.heroRadius} font-bold text-base border`}
                                     style={{ borderColor: colors.border, color: colors.textMuted }}
                                 >
                                     <MessageCircle className="w-5 h-5" />
