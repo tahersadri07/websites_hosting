@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { deleteCustomer } from "./actions";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
 import { CRMList } from "@/components/admin/CRMList";
 
 export default async function CRMPage() {

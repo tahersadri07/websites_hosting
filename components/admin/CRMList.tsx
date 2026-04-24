@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { deleteCustomer } from "@/app/admin/crm/actions";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
 import { CustomerModal } from "./CustomerModal";
 
 interface Props {
@@ -131,7 +130,7 @@ export function CRMList({ initialCustomers }: Props) {
                                         </Badge>
                                     </td>
                                     <td className="px-6 py-4 text-xs text-zinc-500 hidden lg:table-cell">
-                                        {format(new Date(customer.created_at), "MMM d, yyyy")}
+                                        {new Date(customer.created_at).toLocaleDateString("en-US", { month: 'short', day: 'numeric', year: 'numeric' })}
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
