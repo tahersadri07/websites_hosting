@@ -255,15 +255,25 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
 
                                     {paymentMethod === "upi" && upiId && (
                                         <div className="space-y-4 animate-in fade-in slide-in-from-top-4">
-                                            <div className="p-5 rounded-2xl bg-[#0A0A0F] border border-[#27272A] text-center">
+                                            <div className="p-5 rounded-2xl bg-[#0A0A0F] border border-[#27272A] text-center flex flex-col items-center">
                                                 <p className="text-sm text-zinc-400 mb-4">Pay directly via your UPI app (GPay, PhonePe, Paytm)</p>
+                                                
+                                                {/* Dynamic QR Code */}
+                                                <div className="bg-white p-2 rounded-xl mb-4 w-40 h-40">
+                                                    <img 
+                                                        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`upi://pay?pa=${upiId}&pn=${encodeURIComponent(businessName)}&am=${totalPrice}&cu=INR`)}`}
+                                                        alt="UPI QR Code"
+                                                        className="w-full h-full object-contain"
+                                                    />
+                                                </div>
+
                                                 <a 
                                                     href={`upi://pay?pa=${upiId}&pn=${encodeURIComponent(businessName)}&am=${totalPrice}&cu=INR`}
-                                                    className="inline-flex items-center justify-center w-full h-12 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold shadow-lg shadow-blue-500/20"
+                                                    className="inline-flex items-center justify-center w-full h-12 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold shadow-lg shadow-blue-500/20 mb-2"
                                                 >
                                                     Click to Pay {currencySymbol}{totalPrice}
                                                 </a>
-                                                <p className="text-[10px] text-zinc-500 mt-4">Or scan QR code / use UPI ID manually:<br/><strong className="text-zinc-300">{upiId}</strong></p>
+                                                <p className="text-[10px] text-zinc-500">Scan QR or use UPI ID manually:<br/><strong className="text-zinc-300">{upiId}</strong></p>
                                             </div>
 
                                             <div className="space-y-2">
