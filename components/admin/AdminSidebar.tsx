@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import {
     LayoutDashboard, Layers, Image, Star, MessageSquare,
     Settings, LogOut, Menu, X, ChevronRight, ExternalLink,
-    Users, Package, Calendar, Receipt, BarChart3, Mail, Gift,
+    Users, Package, Calendar, Receipt, BarChart3, Mail, Gift, Megaphone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logout } from "@/app/(auth)/login/actions";
@@ -17,6 +17,7 @@ const coreLinks = [
     { href: "/admin/services",     label: "Products",     icon: Layers },
     { href: "/admin/categories",   label: "Categories",   icon: Package },
     { href: "/admin/gallery",      label: "Gallery",      icon: Image },
+    { href: "/admin/marketing",    label: "Marketing",    icon: Megaphone },
     { href: "/admin/testimonials", label: "Testimonials", icon: Star },
     { href: "/admin/inquiries",    label: "Inquiries",    icon: MessageSquare },
     { href: "/admin/settings",     label: "Settings",     icon: Settings },
