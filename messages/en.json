@@ -1,0 +1,57 @@
+{
+    "nav": {
+        "home": "Home",
+        "about": "About",
+        "services": "Services",
+        "gallery": "Gallery",
+        "contact": "Contact",
+        "language": "हिन्दी",
+        "bookNow": "Book Now"
+    },
+    "hero": {
+        "ctaWhatsapp": "Chat on WhatsApp",
+        "ctaCall": "Call Now"
+    },
+    "services": {
+        "title": "Our Professional Services",
+        "subtitle": "We offer a wide range of premium services to help you look and feel your best.",
+        "mins": "mins",
+        "viewDetails": "View Details",
+        "viewAll": "View All Services",
+        "defaultDescription": "Experience our top-rated service provided by skilled professionals."
+    },
+    "testimonials": {
+        "title": "What Our Clients Say"
+    },
+    "gallery": {
+        "title": "Our Gallery",
+        "subtitle": "A glimpse into our work and the results we deliver."
+    },
+    "footer": {
+        "aboutText": "Providing premium small business services in India since 2018. We focus on quality and customer satisfaction.",
+        "quickLinks": "Quick Links",
+        "home": "Home",
+        "about": "About",
+        "services": "Services",
+        "gallery": "Gallery",
+        "contactUs": "Contact Us",
+        "support": "Support",
+        "privacyPolicy": "Privacy Policy",
+        "termsOfService": "Terms of Service",
+        "allRightsReserved": "All rights reserved."
+    },
+    "contact": {
+        "title": "Get in Touch",
+        "subtitle": "Have questions? We'd love to hear from you.",
+        "formTitle": "Send us a Message",
+        "name": "Full Name",
+        "email": "Email Address",
+        "phone": "Phone Number",
+        "message": "Your Message",
+        "submit": "Send Message",
+        "success": "Message sent successfully! We will get back to you soon.",
+        "hours": "Business Hours",
+        "closed": "Closed",
+        "findUs": "Find Us"
+    }
+}

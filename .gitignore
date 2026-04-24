@@ -1,0 +1,30 @@
+# dependencies
+/node_modules
+
+# Next.js
+/.next/
+/out/
+
+# production build
+/build
+
+# environment variables — never commit these
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# compiled seed scripts
+/dist-scripts
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# OS
+.DS_Store
+Thumbs.db
