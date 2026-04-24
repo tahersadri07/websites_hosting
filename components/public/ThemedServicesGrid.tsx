@@ -1,32 +1,49 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
-import { Clock, ArrowUpRight, Tag } from "lucide-react";
+import { Clock, ArrowUpRight, Tag, LayoutGrid } from "lucide-react";
 import type { TemplateConfig } from "@/lib/templates";
+import { cn } from "@/lib/utils";
+
+interface Category {
+    id: string;
+    name: string;
+    slug: string;
+}
 
 interface Service {
     id: string; slug: string; title: string;
     description: string | null; price: number | null;
     duration_minutes: number | null; thumbnail_url: string | null;
     item_number?: string | number | null;
+    category_id?: string | null;
 }
 interface Props {
     services: Service[];
+    categories?: Category[];
     limit?: number;
     currencySymbol?: string | null;
     siteSlug?: string | null;
     template: TemplateConfig;
 }
 
-export function ThemedServicesGrid({ services, limit, currencySymbol = "₹", siteSlug, template }: Props) {
-    const display = limit ? services.slice(0, limit) : services;
+export function ThemedServicesGrid({ services, categories = [], limit, currencySymbol = "₹", siteSlug, template }: Props) {
+    const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+    const [hovered, setHovered] = useState<string | null>(null);
+
+    const filteredServices = useMemo(() => {
+        if (!selectedCategoryId) return services;
+        return services.filter(s => s.category_id === selectedCategoryId);
+    }, [services, selectedCategoryId]);
+
+    const display = limit ? filteredServices.slice(0, limit) : filteredServices;
     const base = siteSlug ? `/sites/${siteSlug}` : "";
     const serviceBase = `${base}/services`;
-    const [hovered, setHovered] = useState<string | null>(null);
-    if (display.length === 0) return null;
 
     const { colors, style } = template;
+
+    if (services.length === 0) return null;
 
     return (
         <section style={{ background: colors.bg }} className="py-24 relative overflow-hidden">
@@ -60,83 +77,128 @@ export function ThemedServicesGrid({ services, limit, currencySymbol = "₹", si
                     )}
                 </div>
 
+                {/* Categories Bar */}
+                {!limit && categories.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-12">
+                        <button
+                            onClick={() => setSelectedCategoryId(null)}
+                            style={{
+                                background: selectedCategoryId === null ? colors.primary : colors.surface,
+                                color: selectedCategoryId === null ? "#FFFFFF" : colors.textMuted,
+                                borderColor: selectedCategoryId === null ? colors.primary : colors.border
+                            }}
+                            className={cn(
+                                "px-5 py-2 rounded-full text-xs font-semibold transition-all border",
+                                selectedCategoryId === null ? "shadow-lg" : "hover:border-primary/50"
+                            )}
+                        >
+                            All
+                        </button>
+                        {categories.map((cat) => (
+                            <button
+                                key={cat.id}
+                                onClick={() => setSelectedCategoryId(cat.id)}
+                                style={{
+                                    background: selectedCategoryId === cat.id ? colors.primary : colors.surface,
+                                    color: selectedCategoryId === cat.id ? "#FFFFFF" : colors.textMuted,
+                                    borderColor: selectedCategoryId === cat.id ? colors.primary : colors.border
+                                }}
+                                className={cn(
+                                    "px-5 py-2 rounded-full text-xs font-semibold transition-all border",
+                                    selectedCategoryId === cat.id ? "shadow-lg" : "hover:border-primary/50"
+                                )}
+                            >
+                                {cat.name}
+                            </button>
+                        ))}
+                    </div>
+                )}
+
                 {/* Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {display.map((service, i) => {
-                        const isHovered = hovered === service.id;
-                        return (
-                            <a key={service.id}
-                                href={`${serviceBase}/${service.slug}`}
-                                onMouseEnter={() => setHovered(service.id)}
-                                onMouseLeave={() => setHovered(null)}
-                                style={{
-                                    background: colors.surface,
-                                    borderColor: isHovered ? colors.primary + "60" : colors.border,
-                                    boxShadow: isHovered ? `0 0 30px ${colors.primary}18` : "none",
-                                }}
-                                className={`group flex flex-col ${style.cardRadius} border overflow-hidden transition-all duration-300`}
-                            >
-                                {/* Image */}
-                                <div className="relative aspect-[4/3] overflow-hidden">
-                                    {service.thumbnail_url ? (
-                                        <Image src={service.thumbnail_url} alt={service.title} fill
-                                            className="object-cover transition-transform duration-500 group-hover:scale-[1.04]" unoptimized />
-                                    ) : (
-                                        <div style={{ background: `linear-gradient(135deg, ${colors.primary}20, ${colors.secondary}15)` }}
-                                            className="w-full h-full flex items-center justify-center">
-                                            <span style={{ color: colors.primary + "30" }}
-                                                className="text-6xl font-black select-none">
-                                                {service.title.charAt(0)}
-                                            </span>
-                                        </div>
-                                    )}
-                                    {/* Price badge */}
-                                    {service.price != null && (
-                                        <div style={{ background: colors.bg + "E6", color: colors.text, borderColor: colors.border }}
-                                            className="absolute top-3 right-3 px-2.5 py-1 rounded-lg text-xs font-bold border backdrop-blur-sm">
-                                            {currencySymbol}{service.price.toLocaleString("en-IN")}
-                                        </div>
-                                    )}
-                                    {/* Hover tint */}
-                                    <div style={{ background: colors.primary + "18" }}
-                                        className={`absolute inset-0 transition-opacity duration-300 ${isHovered ? "opacity-100" : "opacity-0"}`} />
-                                </div>
-
-                                {/* Content */}
-                                <div className="p-5 flex flex-col flex-grow">
-                                    {/* Item number */}
-                                    {(service.item_number != null) && (
-                                        <div className="flex items-center gap-1 mb-2">
-                                            <Tag className="w-2.5 h-2.5" style={{ color: colors.primary }} />
-                                            <span className="text-[10px] font-bold" style={{ color: colors.primary }}>
-                                                Item #{String(service.item_number)}
-                                            </span>
-                                        </div>
-                                    )}
-                                    <div className="flex items-start justify-between gap-2 mb-2">
-                                        <h3 style={{ color: isHovered ? colors.primary : colors.text, fontFamily: `'${template.fonts.heading}', sans-serif` }}
-                                            className="font-semibold text-sm leading-snug transition-colors">
-                                            {service.title}
-                                        </h3>
-                                        <ArrowUpRight style={{ color: isHovered ? colors.primary : colors.border }}
-                                            className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 transition-colors" />
+                    {display.length === 0 ? (
+                        <div style={{ borderColor: colors.border, color: colors.textMuted }}
+                            className="col-span-full py-20 text-center border-2 border-dashed rounded-3xl">
+                            <LayoutGrid className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                            <p>No items found in this category.</p>
+                        </div>
+                    ) : (
+                        display.map((service, i) => {
+                            const isHovered = hovered === service.id;
+                            return (
+                                <a key={service.id}
+                                    href={`${serviceBase}/${service.slug}`}
+                                    onMouseEnter={() => setHovered(service.id)}
+                                    onMouseLeave={() => setHovered(null)}
+                                    style={{
+                                        background: colors.surface,
+                                        borderColor: isHovered ? colors.primary + "60" : colors.border,
+                                        boxShadow: isHovered ? `0 0 30px ${colors.primary}18` : "none",
+                                    }}
+                                    className={`group flex flex-col ${style.cardRadius} border overflow-hidden transition-all duration-300`}
+                                >
+                                    {/* Image */}
+                                    <div className="relative aspect-[4/3] overflow-hidden">
+                                        {service.thumbnail_url ? (
+                                            <Image src={service.thumbnail_url} alt={service.title} fill
+                                                className="object-cover transition-transform duration-500 group-hover:scale-[1.04]" unoptimized />
+                                        ) : (
+                                            <div style={{ background: `linear-gradient(135deg, ${colors.primary}20, ${colors.secondary}15)` }}
+                                                className="w-full h-full flex items-center justify-center">
+                                                <span style={{ color: colors.primary + "30" }}
+                                                    className="text-6xl font-black select-none">
+                                                    {service.title.charAt(0)}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {/* Price badge */}
+                                        {service.price != null && (
+                                            <div style={{ background: colors.bg + "E6", color: colors.text, borderColor: colors.border }}
+                                                className="absolute top-3 right-3 px-2.5 py-1 rounded-lg text-xs font-bold border backdrop-blur-sm">
+                                                {currencySymbol}{service.price.toLocaleString("en-IN")}
+                                            </div>
+                                        )}
+                                        {/* Hover tint */}
+                                        <div style={{ background: colors.primary + "18" }}
+                                            className={`absolute inset-0 transition-opacity duration-300 ${isHovered ? "opacity-100" : "opacity-0"}`} />
                                     </div>
-                                    {service.description && (
-                                        <p style={{ color: colors.textMuted }}
-                                            className="text-xs line-clamp-2 leading-relaxed flex-grow">
-                                            {service.description}
-                                        </p>
-                                    )}
-                                    {service.duration_minutes && (
-                                        <div style={{ color: colors.textMuted + "90", borderColor: colors.border }}
-                                            className="flex items-center gap-1.5 mt-3 text-[11px] border-t pt-3">
-                                            <Clock className="w-3 h-3" /> {service.duration_minutes} mins
+
+                                    {/* Content */}
+                                    <div className="p-5 flex flex-col flex-grow">
+                                        {/* Item number */}
+                                        {(service.item_number != null) && (
+                                            <div className="flex items-center gap-1 mb-2">
+                                                <Tag className="w-2.5 h-2.5" style={{ color: colors.primary }} />
+                                                <span className="text-[10px] font-bold" style={{ color: colors.primary }}>
+                                                    Item #{String(service.item_number)}
+                                                </span>
+                                            </div>
+                                        )}
+                                        <div className="flex items-start justify-between gap-2 mb-2">
+                                            <h3 style={{ color: isHovered ? colors.primary : colors.text, fontFamily: `'${template.fonts.heading}', sans-serif` }}
+                                                className="font-semibold text-sm leading-snug transition-colors">
+                                                {service.title}
+                                            </h3>
+                                            <ArrowUpRight style={{ color: isHovered ? colors.primary : colors.border }}
+                                                className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 transition-colors" />
                                         </div>
-                                    )}
-                                </div>
-                            </a>
-                        );
-                    })}
+                                        {service.description && (
+                                            <p style={{ color: colors.textMuted }}
+                                                className="text-xs line-clamp-2 leading-relaxed flex-grow">
+                                                {service.description}
+                                            </p>
+                                        )}
+                                        {service.duration_minutes && (
+                                            <div style={{ color: colors.textMuted + "90", borderColor: colors.border }}
+                                                className="flex items-center gap-1.5 mt-3 text-[11px] border-t pt-3">
+                                                <Clock className="w-3 h-3" /> {service.duration_minutes} mins
+                                            </div>
+                                        )}
+                                    </div>
+                                </a>
+                            );
+                        })
+                    )}
                 </div>
 
                 {/* View all CTA at bottom */}
@@ -153,3 +215,4 @@ export function ThemedServicesGrid({ services, limit, currencySymbol = "₹", si
         </section>
     );
 }
+

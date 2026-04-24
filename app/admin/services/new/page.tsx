@@ -5,12 +5,22 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ImageUploader } from "@/components/admin/ImageUploader";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Image as ImageIcon } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { getAdminBusinessSlug } from "@/lib/admin-context";
 
+export default async function NewServicePage() {
+    const db = await createClient();
+    const slug = await getAdminBusinessSlug();
+    const { data: business } = await db.from("businesses").select("id").eq("slug", slug).single();
+    const { data: categories } = await db
+        .from("categories")
+        .select("id, name")
+        .eq("business_id", business?.id)
+        .order("sort_order", { ascending: true });
 
-export default function NewServicePage() {
     return (
-        <div className="max-w-2xl space-y-6">
+        <div className="max-w-2xl space-y-6 pb-12">
             <div className="flex items-center space-x-4">
                 <Link href="/admin/services">
                     <Button variant="outline" size="icon" className="rounded-xl h-9 w-9">
@@ -25,15 +35,29 @@ export default function NewServicePage() {
 
             <div className="bg-background rounded-2xl border p-8">
                 <form action={upsertService} className="space-y-6">
-                    <div className="space-y-2">
-                        <Label htmlFor="title">Service Title *</Label>
-                        <Input id="title" name="title" placeholder="e.g., Bridal Makeup" required className="h-11 rounded-xl" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="title">Service Title *</Label>
+                            <Input id="title" name="title" placeholder="e.g., Bridal Makeup" required className="h-11 rounded-xl" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="category_id">Category</Label>
+                            <select 
+                                id="category_id" 
+                                name="category_id" 
+                                className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                <option value="">Select a category</option>
+                                {categories?.map(cat => (
+                                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
 
                     <div className="space-y-2">
                         <Label htmlFor="item_number">Item Number / SKU <span className="text-xs text-muted-foreground">(optional)</span></Label>
                         <Input id="item_number" name="item_number" placeholder="e.g., SKU-001, A12, RIDA-05" className="h-11 rounded-xl" />
-                        <p className="text-xs text-muted-foreground">This appears on the product page and in WhatsApp order messages.</p>
                     </div>
 
                     <div className="space-y-2">
@@ -52,9 +76,15 @@ export default function NewServicePage() {
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <Label>Thumbnail Photo</Label>
-                        <ImageUploader name="thumbnail_url" folder="services" aspectRatio="4/3" label="Service thumbnail" />
+                    <div className="space-y-4">
+                        <Label className="flex items-center gap-2">
+                            <ImageIcon className="w-4 h-4" /> Product Photos (Up to 3)
+                        </Label>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <ImageUploader name="image_url_0" folder="services" aspectRatio="4/3" label="Main Photo" />
+                            <ImageUploader name="image_url_1" folder="services" aspectRatio="4/3" label="Photo 2" />
+                            <ImageUploader name="image_url_2" folder="services" aspectRatio="4/3" label="Photo 3" />
+                        </div>
                     </div>
 
                     <div className="flex items-center space-x-3">
@@ -62,7 +92,7 @@ export default function NewServicePage() {
                         <Label htmlFor="is_active" className="cursor-pointer">Mark as Active (visible on public site)</Label>
                     </div>
 
-                    <div className="flex items-center justify-end space-x-4 pt-4">
+                    <div className="flex items-center justify-end space-x-4 pt-4 border-t">
                         <Link href="/admin/services">
                             <Button type="button" variant="outline" className="rounded-xl">Cancel</Button>
                         </Link>
@@ -75,3 +105,4 @@ export default function NewServicePage() {
         </div>
     );
 }
+

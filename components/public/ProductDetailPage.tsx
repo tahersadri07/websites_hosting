@@ -18,6 +18,7 @@ interface Service {
     price: number | null;
     duration_minutes: number | null;
     thumbnail_url: string | null;
+    image_urls?: string[] | null;
     is_active: boolean;
     item_number?: string | number | null;
     tags?: string[] | null;
@@ -40,11 +41,17 @@ interface Props {
 
 export function ProductDetailPage({ service, business, siteSlug, template, relatedServices = [] }: Props) {
     const [copied, setCopied] = useState(false);
+    const [activeImage, setActiveImage] = useState<string | null>(service.image_urls?.[0] || service.thumbnail_url || null);
     const { colors, style } = template;
 
     const currency = business.currency_symbol ?? "₹";
     const itemLabel = business.services_label ?? "Products & Services";
     const backHref = `/sites/${siteSlug}/services`;
+
+    const allImages = [
+        ...(service.image_urls || []),
+        ...(service.thumbnail_url && !(service.image_urls || []).includes(service.thumbnail_url) ? [service.thumbnail_url] : [])
+    ].filter(Boolean).slice(0, 3);
 
     // Generate item number display — use stored item_number or derive from id
     const itemNum = service.item_number
@@ -110,18 +117,18 @@ export function ProductDetailPage({ service, business, siteSlug, template, relat
                 {/* Main grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-16 items-start">
 
-                    {/* ── Left: Image ── */}
-                    <div className="relative">
+                    {/* ── Left: Image Gallery ── */}
+                    <div className="flex flex-col gap-4">
                         <div
-                            className={`relative aspect-[4/3] ${style.cardRadius} overflow-hidden border`}
+                            className={`relative aspect-[4/3] ${style.cardRadius} overflow-hidden border shadow-2xl`}
                             style={{ borderColor: colors.border, background: colors.surface }}
                         >
-                            {service.thumbnail_url ? (
+                            {activeImage ? (
                                 <Image
-                                    src={service.thumbnail_url}
+                                    src={activeImage}
                                     alt={service.title}
                                     fill
-                                    className="object-cover"
+                                    className="object-cover animate-in fade-in duration-500"
                                     unoptimized
                                 />
                             ) : (
@@ -136,10 +143,24 @@ export function ProductDetailPage({ service, business, siteSlug, template, relat
                                 </div>
                             )}
 
+                            {/* Share button overlay */}
+                            <button
+                                onClick={handleShare}
+                                className="absolute top-4 right-4 p-2 rounded-xl border backdrop-blur-sm transition-all hover:opacity-80 z-10"
+                                style={{ background: colors.bg + "CC", borderColor: colors.border, color: colors.textMuted }}
+                                title="Copy link"
+                            >
+                                {copied ? (
+                                    <CheckCircle2 className="w-4 h-4" style={{ color: colors.primary }} />
+                                ) : (
+                                    <Share2 className="w-4 h-4" />
+                                )}
+                            </button>
+
                             {/* Price badge overlay */}
                             {service.price != null && (
                                 <div
-                                    className="absolute bottom-4 left-4 px-4 py-2 rounded-xl text-sm font-bold shadow-lg backdrop-blur-sm"
+                                    className="absolute bottom-4 left-4 px-4 py-2 rounded-xl text-sm font-bold shadow-lg backdrop-blur-sm z-10"
                                     style={{ background: colors.primary, color: "#fff" }}
                                 >
                                     {currency}{service.price.toLocaleString("en-IN")}
@@ -147,19 +168,24 @@ export function ProductDetailPage({ service, business, siteSlug, template, relat
                             )}
                         </div>
 
-                        {/* Share button */}
-                        <button
-                            onClick={handleShare}
-                            className="absolute top-4 right-4 p-2 rounded-xl border backdrop-blur-sm transition-all hover:opacity-80"
-                            style={{ background: colors.bg + "CC", borderColor: colors.border, color: colors.textMuted }}
-                            title="Copy link"
-                        >
-                            {copied ? (
-                                <CheckCircle2 className="w-4 h-4" style={{ color: colors.primary }} />
-                            ) : (
-                                <Share2 className="w-4 h-4" />
-                            )}
-                        </button>
+                        {/* Thumbnails */}
+                        {allImages.length > 1 && (
+                            <div className="flex items-center gap-4">
+                                {allImages.map((img, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => setActiveImage(img)}
+                                        className={cn(
+                                            "relative w-20 aspect-square rounded-xl border-2 overflow-hidden transition-all",
+                                            activeImage === img ? "scale-105 border-primary shadow-lg shadow-primary/20" : "border-transparent opacity-60 hover:opacity-100"
+                                        )}
+                                        style={{ borderColor: activeImage === img ? colors.primary : "transparent" }}
+                                    >
+                                        <Image src={img} alt={`Gallery ${i}`} fill className="object-cover" unoptimized />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* ── Right: Details ── */}

@@ -15,6 +15,7 @@ import { logout } from "@/app/(auth)/login/actions";
 const coreLinks = [
     { href: "/admin",              label: "Dashboard",    icon: LayoutDashboard, exact: true },
     { href: "/admin/services",     label: "Products",     icon: Layers },
+    { href: "/admin/categories",   label: "Categories",   icon: Package },
     { href: "/admin/gallery",      label: "Gallery",      icon: Image },
     { href: "/admin/testimonials", label: "Testimonials", icon: Star },
     { href: "/admin/inquiries",    label: "Inquiries",    icon: MessageSquare },
