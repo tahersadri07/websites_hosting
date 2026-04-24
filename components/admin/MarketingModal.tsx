@@ -25,9 +25,10 @@ export function MarketingModal({ product, templates, isOpen, onClose, siteUrl }:
 
     const productUrl = `${siteUrl}/services/${product.slug}`;
     
-    const replaceVars = (template: string) => {
+    const replaceVars = (template: string | null | undefined) => {
+        if (!template) return "";
         return template
-            .replace(/{{name}}/g, product.title)
+            .replace(/{{name}}/g, product.title || "")
             .replace(/{{price}}/g, product.price ? `₹${product.price.toLocaleString("en-IN")}` : "N/A")
             .replace(/{{description}}/g, product.description || "")
             .replace(/{{link}}/g, productUrl);
