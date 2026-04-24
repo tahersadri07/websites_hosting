@@ -25,6 +25,7 @@ export async function updateSettings(formData: FormData) {
         business_type: formData.get("business_type") || "service",
         currency_symbol: formData.get("currency_symbol") || "₹",
         custom_domain: ((formData.get("custom_domain") as string) || "").trim().toLowerCase() || null,
+        upi_id: formData.get("upi_id") || null,
     };
 
     await (supabase as any).from("businesses").update(payload).eq("id", id);

@@ -23,6 +23,7 @@ interface Props {
     businessName: string;
     whatsappNumber: string | null;
     currencySymbol: string;
+    upiId?: string | null;
 }
 
 export function FloatingCart({ businessId, businessName, whatsappNumber, currencySymbol }: Props) {
@@ -33,8 +34,10 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
         isDrawerOpen, setIsDrawerOpen, activeTab, setActiveTab
     } = useCart();
     
-    const [step, setStep] = useState<"review" | "details">("review");
+    const [step, setStep] = useState<"review" | "details" | "payment">("review");
     const [details, setDetails] = useState({ name: "", phone: "", address: "" });
+    const [paymentMethod, setPaymentMethod] = useState<"cash" | "upi">("cash");
+    const [transactionId, setTransactionId] = useState("");
     const [loading, setLoading] = useState(false);
 
     // Reset step when tab changes or drawer closes
@@ -56,7 +59,9 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
                     businessId,
                     items,
                     details,
-                    totalAmount: totalPrice
+                    totalAmount: totalPrice,
+                    paymentMethod,
+                    transactionId
                 })
             });
             const data = await res.json();
@@ -78,6 +83,9 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
             `Name: ${details.name}`,
             `Phone: ${details.phone}`,
             `Address: ${details.address}`,
+            ``,
+            `💳 *Payment Method:* ${paymentMethod === 'upi' ? 'Paid via UPI/GPay' : 'Cash / Pay Later'}`,
+            transactionId ? `*Transaction ID:* ${transactionId}` : ``,
             ``,
             `Please confirm my order. Thank you!`,
         ].filter(Boolean).join("\n");
@@ -146,7 +154,11 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
                             </button>
                         </div>
                         <SheetTitle className="text-white text-xl">
-                            {activeTab === "cart" ? (step === "review" ? "Shopping Cart" : "Checkout Details") : "Your Wishlist"}
+                            {activeTab === "cart" ? (
+                                step === "review" ? "Shopping Cart" : 
+                                step === "details" ? "Checkout Details" : 
+                                "Payment"
+                            ) : "Your Wishlist"}
                         </SheetTitle>
                     </SheetHeader>
 
@@ -204,6 +216,67 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
                                         <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Delivery Address</Label>
                                         <Input value={details.address} onChange={(e) => setDetails({...details, address: e.target.value})} placeholder="Address" className="h-12 rounded-xl" />
                                     </div>
+                                </div>
+                            ) : (
+                                <div className="space-y-6">
+                                    <div className="bg-muted/50 p-4 rounded-2xl border border-border">
+                                        <h4 className="font-bold mb-4">Select Payment Method</h4>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <button 
+                                                onClick={() => setPaymentMethod("cash")}
+                                                className={cn(
+                                                    "p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 text-center",
+                                                    paymentMethod === "cash" ? "border-business-primary bg-business-primary/5 text-business-primary" : "border-transparent bg-background text-zinc-500 hover:bg-muted"
+                                                )}
+                                            >
+                                                <span className="font-bold text-sm">Pay Later</span>
+                                                <span className="text-[10px]">Cash or Transfer later</span>
+                                            </button>
+                                            
+                                            {upiId ? (
+                                                <button 
+                                                    onClick={() => setPaymentMethod("upi")}
+                                                    className={cn(
+                                                        "p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 text-center",
+                                                        paymentMethod === "upi" ? "border-business-primary bg-business-primary/5 text-business-primary" : "border-transparent bg-background text-zinc-500 hover:bg-muted"
+                                                    )}
+                                                >
+                                                    <span className="font-bold text-sm">GPay / UPI</span>
+                                                    <span className="text-[10px]">Pay securely now</span>
+                                                </button>
+                                            ) : (
+                                                <div className="p-4 rounded-xl border-2 border-transparent bg-background opacity-50 flex flex-col items-center gap-2 text-center cursor-not-allowed">
+                                                    <span className="font-bold text-sm text-zinc-500">GPay / UPI</span>
+                                                    <span className="text-[10px] text-zinc-500">Not configured</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {paymentMethod === "upi" && upiId && (
+                                        <div className="space-y-4 animate-in fade-in slide-in-from-top-4">
+                                            <div className="p-5 rounded-2xl bg-[#0A0A0F] border border-[#27272A] text-center">
+                                                <p className="text-sm text-zinc-400 mb-4">Pay directly via your UPI app (GPay, PhonePe, Paytm)</p>
+                                                <a 
+                                                    href={`upi://pay?pa=${upiId}&pn=${encodeURIComponent(businessName)}&am=${totalPrice}&cu=INR`}
+                                                    className="inline-flex items-center justify-center w-full h-12 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold shadow-lg shadow-blue-500/20"
+                                                >
+                                                    Click to Pay {currencySymbol}{totalPrice}
+                                                </a>
+                                                <p className="text-[10px] text-zinc-500 mt-4">Or scan QR code / use UPI ID manually:<br/><strong className="text-zinc-300">{upiId}</strong></p>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Transaction ID (Required)</Label>
+                                                <Input 
+                                                    value={transactionId} 
+                                                    onChange={(e) => setTransactionId(e.target.value)} 
+                                                    placeholder="Enter 12-digit UTR / Ref No." 
+                                                    className="h-12 rounded-xl bg-background border-border" 
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )
                         ) : (
@@ -264,11 +337,22 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
                                     <Button onClick={() => setStep("details")} className="w-full py-7 rounded-2xl text-base font-bold bg-zinc-900 hover:bg-zinc-800 shadow-xl">
                                         Proceed to Checkout
                                     </Button>
-                                ) : (
+                                ) : step === "details" ? (
                                     <div className="flex gap-3">
                                         <Button variant="outline" onClick={() => setStep("review")} className="h-14 rounded-2xl px-6">Back</Button>
                                         <Button 
-                                            disabled={!details.name || !details.phone || !details.address || loading}
+                                            disabled={!details.name || !details.phone || !details.address}
+                                            onClick={() => setStep("payment")}
+                                            className="flex-grow h-14 rounded-2xl text-base font-bold bg-business-primary hover:bg-business-primary/90 text-white"
+                                        >
+                                            Continue to Payment
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <div className="flex gap-3">
+                                        <Button variant="outline" onClick={() => setStep("details")} className="h-14 rounded-2xl px-6">Back</Button>
+                                        <Button 
+                                            disabled={loading || (paymentMethod === "upi" && transactionId.trim().length < 4)}
                                             onClick={handleCheckout}
                                             className="flex-grow h-14 rounded-2xl text-base font-bold bg-[#25D366] hover:bg-[#20bd5c] text-white shadow-lg shadow-[#25D366]/20"
                                         >

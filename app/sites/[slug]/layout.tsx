@@ -118,6 +118,7 @@ export default async function SiteLayout({ children, params }: Props) {
                             businessName={business.name} 
                             whatsappNumber={business.whatsapp}
                             currencySymbol={(business as any).currency_symbol ?? "₹"}
+                            upiId={(business as any).upi_id ?? null}
                         />
                     </div>
                 </ThemeProvider>

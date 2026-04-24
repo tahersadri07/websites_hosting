@@ -61,6 +61,10 @@ export default async function SettingsPage() {
                         </div>
                     </div>
                     <div className="space-y-2">
+                        <Label htmlFor="upi_id">UPI ID (for payments)</Label>
+                        <Input id="upi_id" name="upi_id" defaultValue={(b as any).upi_id ?? ""} placeholder="e.g. yourname@okicici" className="h-11 rounded-xl" />
+                    </div>
+                    <div className="space-y-2">
                         <Label htmlFor="email">Email</Label>
                         <Input id="email" name="email" type="email" defaultValue={b.email ?? ""} className="h-11 rounded-xl" />
                     </div>
