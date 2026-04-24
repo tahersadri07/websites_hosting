@@ -8,7 +8,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { Menu, X, MessageCircle } from "lucide-react";
+import { Menu, X, MessageCircle, Heart, ShoppingCart } from "lucide-react";
+import { useCart } from "@/context/CartContext";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
@@ -29,6 +30,7 @@ interface NavbarProps {
 }
 
 export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, siteSlug, template, categories = [] }: NavbarProps) {
+    const { itemCount, wishlistCount, setIsDrawerOpen, setActiveTab } = useCart();
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [showServicesDropdown, setShowServicesDropdown] = useState(false);
@@ -141,6 +143,32 @@ export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, s
 
                 {/* CTA + Language */}
                 <div className="hidden md:flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 mr-2">
+                        <button 
+                            onClick={() => { setActiveTab("wishlist"); setIsDrawerOpen(true); }}
+                            className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 relative group transition-all"
+                            title="Wishlist"
+                        >
+                            <Heart className="w-5 h-5" />
+                            {wishlistCount > 0 && (
+                                <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-[#0A0A0F]">
+                                    {wishlistCount}
+                                </span>
+                            )}
+                        </button>
+                        <button 
+                            onClick={() => { setActiveTab("cart"); setIsDrawerOpen(true); }}
+                            className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 relative group transition-all"
+                            title="Cart"
+                        >
+                            <ShoppingCart className="w-5 h-5" />
+                            {itemCount > 0 && (
+                                <span className="absolute top-1 right-1 w-4 h-4 bg-business-primary text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-[#0A0A0F]">
+                                    {itemCount}
+                                </span>
+                            )}
+                        </button>
+                    </div>
                     <button onClick={toggleLocale}
                         className="text-xs font-semibold text-zinc-500 hover:text-white transition-colors px-2 py-1 rounded-lg hover:bg-white/5">
                         {t("language")}

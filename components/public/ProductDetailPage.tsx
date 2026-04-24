@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
     Clock, ArrowLeft, MessageCircle, Hash,
     CheckCircle2, ShoppingBag, Share2, Star,
-    Package, Sparkles, Tag
+    Package, Sparkles, Tag, Heart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { TemplateConfig } from "@/lib/templates";
@@ -48,6 +48,9 @@ export function ProductDetailPage({ service, business, siteSlug, template, relat
     const [copied, setCopied] = useState(false);
     const [activeImage, setActiveImage] = useState<string | null>(service.image_urls?.[0] || service.thumbnail_url || null);
     const { colors, style } = template;
+
+    const { addToCart, addToWishlist, removeFromWishlist, wishlist } = useCart();
+    const isInWishlist = wishlist.some(i => i.id === service.id);
 
     const currency = business.currency_symbol ?? "₹";
     const itemLabel = business.services_label ?? "Products & Services";
@@ -329,6 +332,23 @@ export function ProductDetailPage({ service, business, siteSlug, template, relat
                                             <MessageCircle className="w-5 h-5 fill-current" />
                                             Direct WhatsApp
                                         </a>
+                                        <Button 
+                                            onClick={() => isInWishlist ? removeFromWishlist(service.id) : addToWishlist({
+                                                id: service.id,
+                                                slug: service.slug,
+                                                title: service.title,
+                                                price: service.price,
+                                                thumbnail_url: service.thumbnail_url,
+                                                quantity: 1
+                                            })}
+                                            variant="outline"
+                                            className={cn(
+                                                "h-14 w-14 rounded-2xl border transition-all",
+                                                isInWishlist ? "bg-red-50 text-red-500 border-red-200" : "hover:border-red-200 hover:text-red-500"
+                                            )}
+                                        >
+                                            <Heart className={cn("w-6 h-6", isInWishlist && "fill-current")} />
+                                        </Button>
                                     </div>
                                 )
                             ) : (

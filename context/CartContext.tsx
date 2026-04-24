@@ -13,35 +13,46 @@ export interface CartItem {
 
 interface CartContextType {
     items: CartItem[];
+    wishlist: CartItem[];
     addToCart: (item: CartItem) => void;
     removeFromCart: (id: string) => void;
     updateQuantity: (id: string, delta: number) => void;
     clearCart: () => void;
+    addToWishlist: (item: CartItem) => void;
+    removeFromWishlist: (id: string) => void;
     itemCount: number;
+    wishlistCount: number;
     totalPrice: number;
+    isDrawerOpen: boolean;
+    setIsDrawerOpen: (open: boolean) => void;
+    activeTab: "cart" | "wishlist";
+    setActiveTab: (tab: "cart" | "wishlist") => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
     const [items, setItems] = useState<CartItem[]>([]);
+    const [wishlist, setWishlist] = useState<CartItem[]>([]);
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState<"cart" | "wishlist">("cart");
 
     // Load from localStorage
     useEffect(() => {
-        const saved = localStorage.getItem("cart");
-        if (saved) {
-            try {
-                setItems(JSON.parse(saved));
-            } catch (e) {
-                console.error("Failed to parse cart", e);
-            }
-        }
+        const savedCart = localStorage.getItem("cart");
+        const savedWish = localStorage.getItem("wishlist");
+        if (savedCart) try { setItems(JSON.parse(savedCart)); } catch (e) { console.error(e); }
+        if (savedWish) try { setWishlist(JSON.parse(savedWish)); } catch (e) { console.error(e); }
     }, []);
 
     // Save to localStorage
     useEffect(() => {
         localStorage.setItem("cart", JSON.stringify(items));
     }, [items]);
+
+    useEffect(() => {
+        localStorage.setItem("wishlist", JSON.stringify(wishlist));
+    }, [wishlist]);
 
     const addToCart = (newItem: CartItem) => {
         setItems(prev => {
@@ -72,13 +83,27 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     const clearCart = () => setItems([]);
 
+    const addToWishlist = (newItem: CartItem) => {
+        setWishlist(prev => {
+            if (prev.find(i => i.id === newItem.id)) return prev;
+            return [...prev, newItem];
+        });
+    };
+
+    const removeFromWishlist = (id: string) => {
+        setWishlist(prev => prev.filter(i => i.id !== id));
+    };
+
     const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
+    const wishlistCount = wishlist.length;
     const totalPrice = items.reduce((acc, item) => acc + (item.price || 0) * item.quantity, 0);
 
     return (
         <CartContext.Provider value={{ 
-            items, addToCart, removeFromCart, updateQuantity, clearCart, 
-            itemCount, totalPrice 
+            items, wishlist, addToCart, removeFromCart, updateQuantity, clearCart, 
+            addToWishlist, removeFromWishlist,
+            itemCount, wishlistCount, totalPrice,
+            isDrawerOpen, setIsDrawerOpen, activeTab, setActiveTab
         }}>
             {children}
         </CartContext.Provider>
