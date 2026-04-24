@@ -60,6 +60,24 @@ export async function POST(request: Request) {
 
         if (error) throw error;
 
+        // CRM Integration: Automatically add/update customer
+        try {
+            await (supabase as any)
+                .from("customers")
+                .upsert({
+                    business_id: bizId,
+                    name: parsed.data.name,
+                    phone: parsed.data.phone,
+                    email: parsed.data.email || null,
+                    last_contacted_at: new Date().toISOString(),
+                }, {
+                    onConflict: 'business_id,phone'
+                });
+        } catch (crmErr) {
+            console.error("Failed to sync to CRM", crmErr);
+            // Don't fail the inquiry if CRM sync fails
+        }
+
         return NextResponse.json({ success: true }, { status: 201 });
     } catch (err) {
         console.error("[POST /api/inquiries]", err);

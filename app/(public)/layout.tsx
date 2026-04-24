@@ -4,6 +4,8 @@ import { Navbar } from "@/components/public/Navbar";
 import { Footer } from "@/components/public/Footer";
 import { FloatingWhatsApp } from "@/components/public/FloatingWhatsApp";
 import { Construction } from "lucide-react";
+import { CartProvider } from "@/context/CartContext";
+import { FloatingCart } from "@/components/public/FloatingCart";
 
 const FALLBACK_BUSINESS = {
     name: "My Business",
@@ -95,22 +97,30 @@ export default async function PublicLayout({ children }: { children: React.React
 
     return (
         <NextIntlClientProvider locale={locale} messages={messages}>
-            <div className="flex min-h-screen flex-col">
-                <Navbar
-                    businessName={business.name}
-                    logoUrl={(business as any).logo_url ?? null}
-                    whatsappNumber={business.whatsapp}
-                />
-                <main className="flex-grow">{children}</main>
-                <Footer
-                    businessName={business.name}
-                    phone={business.phone}
-                    email={business.email}
-                    address={business.address}
-                    socials={socials}
-                />
-                {business.whatsapp && <FloatingWhatsApp phone={business.whatsapp} />}
-            </div>
+            <CartProvider>
+                <div className="flex min-h-screen flex-col">
+                    <Navbar
+                        businessName={business.name}
+                        logoUrl={(business as any).logo_url ?? null}
+                        whatsappNumber={business.whatsapp}
+                    />
+                    <main className="flex-grow">{children}</main>
+                    <Footer
+                        businessName={business.name}
+                        phone={business.phone}
+                        email={business.email}
+                        address={business.address}
+                        socials={socials}
+                    />
+                    {business.whatsapp && <FloatingWhatsApp phone={business.whatsapp} />}
+                    <FloatingCart 
+                        businessId={(business as any).id}
+                        businessName={business.name} 
+                        whatsappNumber={business.whatsapp}
+                        currencySymbol={(business as any).currency_symbol ?? "₹"}
+                    />
+                </div>
+            </CartProvider>
         </NextIntlClientProvider>
     );
 }
