@@ -45,6 +45,9 @@ export async function upsertService(formData: FormData) {
         image_urls: imageUrls,
         item_number: (formData.get("item_number") as string)?.trim() || null,
         is_active: formData.get("is_active") === "on",
+        manage_inventory: formData.get("manage_inventory") === "on",
+        stock_quantity: formData.get("stock_quantity") ? Number(formData.get("stock_quantity")) : 0,
+        low_stock_threshold: formData.get("low_stock_threshold") ? Number(formData.get("low_stock_threshold")) : 5,
     };
 
     if (id) {

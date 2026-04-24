@@ -19,6 +19,8 @@ interface Service {
     duration_minutes: number | null; thumbnail_url: string | null;
     item_number?: string | number | null;
     category_id?: string | null;
+    manage_inventory?: boolean;
+    stock_quantity?: number;
 }
 interface Props {
     services: Service[];
@@ -166,6 +168,13 @@ export function ThemedServicesGrid({ services, categories = [], limit, currencyS
                                             <div style={{ background: colors.bg + "E6", color: colors.text, borderColor: colors.border }}
                                                 className="absolute top-3 right-3 px-2.5 py-1 rounded-lg text-xs font-bold border backdrop-blur-sm">
                                                 {currencySymbol}{service.price.toLocaleString("en-IN")}
+                                            </div>
+                                        )}
+                                        {/* Out of Stock Overlay */}
+                                        {service.manage_inventory && (service.stock_quantity ?? 0) <= 0 && (
+                                            <div style={{ background: "#000000CC", color: "#FFFFFF" }}
+                                                className="absolute inset-0 flex items-center justify-center font-bold text-sm tracking-widest uppercase z-10">
+                                                Out of Stock
                                             </div>
                                         )}
                                         {/* Hover tint */}
