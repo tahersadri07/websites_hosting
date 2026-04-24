@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import { Clock, ArrowUpRight, Tag, LayoutGrid } from "lucide-react";
 import type { TemplateConfig } from "@/lib/templates";
 import { cn } from "@/lib/utils";
+import { useSearchParams } from "next/navigation";
 
 interface Category {
     id: string;
@@ -29,8 +30,17 @@ interface Props {
 }
 
 export function ThemedServicesGrid({ services, categories = [], limit, currencySymbol = "₹", siteSlug, template }: Props) {
-    const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+    const searchParams = useSearchParams();
+    const categoryParam = searchParams.get("category");
+    const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(categoryParam);
     const [hovered, setHovered] = useState<string | null>(null);
+
+    // Update selected category when URL param changes
+    useEffect(() => {
+        if (categoryParam) {
+            setSelectedCategoryId(categoryParam);
+        }
+    }, [categoryParam]);
 
     const filteredServices = useMemo(() => {
         if (!selectedCategoryId) return services;

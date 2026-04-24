@@ -45,8 +45,10 @@ export default async function SiteLayout({ children, params }: Props) {
     const { slug } = params;
     const db = createServiceClient();
 
-    const { data: business, error } = await db
-        .from("businesses").select("*").eq("slug", slug).single();
+    const [{ data: business, error }, { data: categories }] = await Promise.all([
+        db.from("businesses").select("*").eq("slug", slug).single(),
+        db.from("categories").select("id, name, slug").eq("business_id", (await db.from("businesses").select("id").eq("slug", slug).single()).data?.id).order("sort_order")
+    ]);
 
     if (error || !business) notFound();
 
@@ -88,6 +90,7 @@ export default async function SiteLayout({ children, params }: Props) {
                         servicesLabel={business.services_label}
                         siteSlug={slug}
                         template={template}
+                        categories={categories ?? []}
                     />
                     <main className="flex-grow">{children}</main>
                     <Footer
