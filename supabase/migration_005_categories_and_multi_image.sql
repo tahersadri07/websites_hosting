@@ -19,8 +19,8 @@ ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 -- RLS Policies
 CREATE POLICY "categories_read_all" ON categories FOR SELECT USING (true);
 CREATE POLICY "categories_admin_all" ON categories FOR ALL 
-    USING (business_id IN (SELECT id FROM businesses WHERE owner_id = auth.uid()))
-    WITH CHECK (business_id IN (SELECT id FROM businesses WHERE owner_id = auth.uid()));
+    USING (is_member(business_id))
+    WITH CHECK (is_member(business_id));
 
 -- ─── 2. Update services table ───────────────────────────────────────────────
 -- Add category_id
