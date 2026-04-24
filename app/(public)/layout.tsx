@@ -4,6 +4,8 @@ import { Navbar } from "@/components/public/Navbar";
 import { Footer } from "@/components/public/Footer";
 import { FloatingWhatsApp } from "@/components/public/FloatingWhatsApp";
 import { Construction } from "lucide-react";
+import { CartProvider } from "@/context/CartContext";
+import { FloatingCart } from "@/components/public/FloatingCart";
 
 const FALLBACK_BUSINESS = {
     name: "My Business",
@@ -68,8 +70,6 @@ function MaintenancePage({ name, message, status }: { name: string; message?: st
     );
 }
 
-import { CartProvider } from "@/context/CartContext";
-
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
     const [{ business }, locale, messages] = await Promise.all([
         getBusinessData(),
@@ -94,8 +94,6 @@ export default async function PublicLayout({ children }: { children: React.React
         instagram: (business as any).instagram_url ?? null,
         youtube:   (business as any).youtube_url   ?? null,
     };
-
-import { FloatingCart } from "@/components/public/FloatingCart";
 
     return (
         <NextIntlClientProvider locale={locale} messages={messages}>
