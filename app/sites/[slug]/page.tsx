@@ -7,6 +7,7 @@ import { GallerySection } from "@/components/public/GallerySection";
 import { ContactSection } from "@/components/public/ContactSection";
 import { getTemplate } from "@/lib/templates";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 interface Props { params: { slug: string } }
 
@@ -48,13 +49,15 @@ export default async function SiteHomePage({ params }: Props) {
                 siteSlug={slug}
             />
 
-            <ThemedServicesGrid
-                services={bizServices ?? []}
-                limit={6}
-                currencySymbol={(business as any).currency_symbol ?? "₹"}
-                siteSlug={slug}
-                template={template}
-            />
+            <Suspense fallback={null}>
+                <ThemedServicesGrid
+                    services={bizServices ?? []}
+                    limit={6}
+                    currencySymbol={(business as any).currency_symbol ?? "₹"}
+                    siteSlug={slug}
+                    template={template}
+                />
+            </Suspense>
 
             {(bizTestimonials ?? []).length > 0 && (
                 <TestimonialsCarousel testimonials={bizTestimonials} />

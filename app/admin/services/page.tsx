@@ -1,4 +1,4 @@
-﻿import { getAdminBusinessSlug } from "@/lib/admin-context";
+import { getAdminBusinessSlug } from "@/lib/admin-context";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Plus, Pencil, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
@@ -6,19 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { deleteService, toggleServiceActive } from "./actions";
 import { formatCurrency } from "@/lib/utils";
+import { ShareServiceButton } from "@/components/admin/ShareServiceButton";
 
 export default async function ServicesAdminPage() {
     const slug = await getAdminBusinessSlug();
     const supabase = await createClient();
 
     const { data: business } = await (supabase as any)
-        .from("businesses").select("id").eq("slug", slug).single();
+        .from("businesses").select("id, slug, marketing_whatsapp_template, marketing_insta_post_template, marketing_insta_story_template").eq("slug", slug).single();
 
     const { data: services } = await (supabase as any)
         .from("services")
         .select("*")
         .eq("business_id", business?.id)
         .order("sort_order");
+
+    const siteUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/sites/${slug}`;
 
     return (
         <div className="max-w-5xl space-y-6">
@@ -76,6 +79,7 @@ export default async function ServicesAdminPage() {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center justify-end space-x-2">
+                                            <ShareServiceButton product={svc} business={business} siteUrl={siteUrl} />
                                             <Link href={`/admin/services/${svc.id}/edit`}>
                                                 <Button size="sm" variant="outline" className="rounded-lg h-8 w-8 p-0">
                                                     <Pencil className="w-3.5 h-3.5" />
