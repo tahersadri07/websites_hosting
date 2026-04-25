@@ -69,142 +69,144 @@ export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, s
     };
 
     return (
-        <header 
-            style={{ 
-                backgroundColor: scrolled ? `${colors.bg}${template?.style.navStyle === 'glass' ? 'CC' : ''}` : 'transparent',
-                borderBottomColor: scrolled ? colors.border : 'transparent'
-            }}
-            className={cn(
-                "fixed top-0 z-50 w-full transition-all duration-300 border-b",
-                template?.style.navStyle === 'glass' && "backdrop-blur-xl",
-                scrolled ? "py-3 shadow-lg" : "py-5 border-transparent"
-            )}
-        >
-            <div className="container mx-auto px-6 flex items-center justify-between max-w-7xl">
-                {/* Logo */}
-                <Link href={base || "/"} className="flex items-center gap-2.5">
-                    {logoUrl ? (
-                        <Image src={logoUrl} alt={businessName} width={140} height={40}
-                            className="h-9 w-auto object-contain" unoptimized />
-                    ) : (
-                        <span style={{ color: colors.text }} className="text-lg font-bold tracking-tight">
-                            {businessName}
-                        </span>
-                    )}
-                </Link>
+        <>
+            <header 
+                style={{ 
+                    backgroundColor: scrolled ? `${colors.bg}${template?.style.navStyle === 'glass' ? 'CC' : ''}` : 'transparent',
+                    borderBottomColor: scrolled ? colors.border : 'transparent'
+                }}
+                className={cn(
+                    "fixed top-0 z-50 w-full transition-all duration-300 border-b",
+                    template?.style.navStyle === 'glass' && "backdrop-blur-xl",
+                    scrolled ? "py-3 shadow-lg" : "py-5 border-transparent"
+                )}
+            >
+                <div className="container mx-auto px-6 flex items-center justify-between max-w-7xl">
+                    {/* Logo */}
+                    <Link href={base || "/"} className="flex items-center gap-2.5">
+                        {logoUrl ? (
+                            <Image src={logoUrl} alt={businessName} width={140} height={40}
+                                className="h-9 w-auto object-contain" unoptimized />
+                        ) : (
+                            <span style={{ color: colors.text }} className="text-lg font-bold tracking-tight">
+                                {businessName}
+                            </span>
+                        )}
+                    </Link>
 
-                {/* Desktop nav */}
-                <nav className="hidden md:flex items-center gap-1">
-                    {navLinks.map(link => (
-                        <div 
-                            key={link.href} 
-                            className="relative group"
-                            onMouseEnter={() => link.hasDropdown && setShowServicesDropdown(true)}
-                            onMouseLeave={() => link.hasDropdown && setShowServicesDropdown(false)}
-                        >
-                            <Link href={link.href}
-                                style={{ 
-                                    color: pathname === link.href ? colors.text : colors.textMuted,
-                                    backgroundColor: pathname === link.href ? `${colors.primary}15` : 'transparent'
-                                }}
-                                className="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1 hover:opacity-80"
+                    {/* Desktop nav */}
+                    <nav className="hidden md:flex items-center gap-1">
+                        {navLinks.map(link => (
+                            <div 
+                                key={link.href} 
+                                className="relative group"
+                                onMouseEnter={() => link.hasDropdown && setShowServicesDropdown(true)}
+                                onMouseLeave={() => link.hasDropdown && setShowServicesDropdown(false)}
                             >
-                                {link.label}
-                                {link.hasDropdown && (
-                                    <svg className={cn("w-3.5 h-3.5 transition-transform duration-200", showServicesDropdown && "rotate-180")} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                )}
-                            </Link>
-
-                            {/* Dropdown menu */}
-                            {link.hasDropdown && (
-                                <div 
+                                <Link href={link.href}
                                     style={{ 
-                                        backgroundColor: colors.surface, 
-                                        borderColor: colors.border,
-                                        borderRadius: template?.style.heroRadius === 'rounded-none' ? '0' : '12px'
+                                        color: pathname === link.href ? colors.text : colors.textMuted,
+                                        backgroundColor: pathname === link.href ? `${colors.primary}15` : 'transparent'
                                     }}
-                                    className={cn(
-                                        "absolute top-full left-0 mt-1 w-56 border shadow-2xl p-2 transition-all duration-200 origin-top-left z-50",
-                                        showServicesDropdown ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
-                                    )}
+                                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1 hover:opacity-80"
                                 >
-                                    <Link 
-                                        href={link.href} 
-                                        style={{ color: colors.textMuted }}
-                                        className="block px-3 py-2 text-[10px] font-bold uppercase tracking-wider hover:opacity-80 transition-all mb-1"
+                                    {link.label}
+                                    {link.hasDropdown && (
+                                        <svg className={cn("w-3.5 h-3.5 transition-transform duration-200", showServicesDropdown && "rotate-180")} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    )}
+                                </Link>
+
+                                {/* Dropdown menu */}
+                                {link.hasDropdown && (
+                                    <div 
+                                        style={{ 
+                                            backgroundColor: colors.surface, 
+                                            borderColor: colors.border,
+                                            borderRadius: template?.style.heroRadius === 'rounded-none' ? '0' : '12px'
+                                        }}
+                                        className={cn(
+                                            "absolute top-full left-0 mt-1 w-56 border shadow-2xl p-2 transition-all duration-200 origin-top-left z-50",
+                                            showServicesDropdown ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
+                                        )}
                                     >
-                                        View All
-                                    </Link>
-                                    <div style={{ backgroundColor: colors.border }} className="h-px mx-2 mb-1" />
-                                    {link.categories?.map(cat => (
                                         <Link 
-                                            key={cat.id} 
-                                            href={`${link.href}?category=${cat.id}`}
-                                            style={{ color: colors.text }}
-                                            className="block px-3 py-2 text-sm font-medium hover:opacity-70 transition-colors"
+                                            href={link.href} 
+                                            style={{ color: colors.textMuted }}
+                                            className="block px-3 py-2 text-[10px] font-bold uppercase tracking-wider hover:opacity-80 transition-all mb-1"
                                         >
-                                            {cat.name}
+                                            View All
                                         </Link>
-                                    ))}
-                                </div>
-                            )}
+                                        <div style={{ backgroundColor: colors.border }} className="h-px mx-2 mb-1" />
+                                        {link.categories?.map(cat => (
+                                            <Link 
+                                                key={cat.id} 
+                                                href={`${link.href}?category=${cat.id}`}
+                                                style={{ color: colors.text }}
+                                                className="block px-3 py-2 text-sm font-medium hover:opacity-70 transition-colors"
+                                            >
+                                                {cat.name}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </nav>
+
+                    {/* CTA + Language */}
+                    <div className="hidden md:flex items-center gap-3">
+                        <div className="flex items-center gap-1.5 mr-2">
+                            <button 
+                                onClick={() => { setActiveTab("wishlist"); setIsDrawerOpen(true); }}
+                                style={{ color: colors.textMuted }}
+                                className="p-2 rounded-xl hover:bg-black/5 relative group transition-all"
+                                title="Wishlist"
+                            >
+                                <Heart className="w-5 h-5" />
+                                {wishlistCount > 0 && (
+                                    <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white">
+                                        {wishlistCount}
+                                    </span>
+                                )}
+                            </button>
+                            <button 
+                                onClick={() => { setActiveTab("cart"); setIsDrawerOpen(true); }}
+                                style={{ color: colors.textMuted }}
+                                className="p-2 rounded-xl hover:bg-black/5 relative group transition-all"
+                                title="Cart"
+                            >
+                                <ShoppingCart className="w-5 h-5" />
+                                {itemCount > 0 && (
+                                    <span style={{ backgroundColor: colors.primary }} className="absolute top-1 right-1 w-4 h-4 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white">
+                                        {itemCount}
+                                    </span>
+                                )}
+                            </button>
                         </div>
-                    ))}
-                </nav>
-
-                {/* CTA + Language */}
-                <div className="hidden md:flex items-center gap-3">
-                    <div className="flex items-center gap-1.5 mr-2">
-                        <button 
-                            onClick={() => { setActiveTab("wishlist"); setIsDrawerOpen(true); }}
-                            style={{ color: colors.textMuted }}
-                            className="p-2 rounded-xl hover:bg-black/5 relative group transition-all"
-                            title="Wishlist"
-                        >
-                            <Heart className="w-5 h-5" />
-                            {wishlistCount > 0 && (
-                                <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white">
-                                    {wishlistCount}
-                                </span>
-                            )}
-                        </button>
-                        <button 
-                            onClick={() => { setActiveTab("cart"); setIsDrawerOpen(true); }}
-                            style={{ color: colors.textMuted }}
-                            className="p-2 rounded-xl hover:bg-black/5 relative group transition-all"
-                            title="Cart"
-                        >
-                            <ShoppingCart className="w-5 h-5" />
-                            {itemCount > 0 && (
-                                <span style={{ backgroundColor: colors.primary }} className="absolute top-1 right-1 w-4 h-4 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white">
-                                    {itemCount}
-                                </span>
-                            )}
-                        </button>
+                        {whatsappNumber && (
+                            <button onClick={handleWhatsApp}
+                                style={{ backgroundColor: colors.primary, borderRadius: template?.style.heroRadius === 'rounded-none' ? '0' : '8px' }}
+                                className="flex items-center gap-2 px-4 py-2 text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg">
+                                <MessageCircle className="w-4 h-4" />
+                                {t("bookNow")}
+                            </button>
+                        )}
                     </div>
-                    {whatsappNumber && (
-                        <button onClick={handleWhatsApp}
-                            style={{ backgroundColor: colors.primary, borderRadius: template?.style.heroRadius === 'rounded-none' ? '0' : '8px' }}
-                            className="flex items-center gap-2 px-4 py-2 text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg">
-                            <MessageCircle className="w-4 h-4" />
-                            {t("bookNow")}
-                        </button>
-                    )}
-                </div>
 
-                {/* Mobile toggle */}
-                <button onClick={() => setIsOpen(!isOpen)} style={{ color: colors.textMuted }} className="md:hidden transition-colors" aria-label="Menu">
-                    {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                </button>
-            </div>
+                    {/* Mobile toggle */}
+                    <button onClick={() => setIsOpen(!isOpen)} style={{ color: colors.textMuted }} className="md:hidden transition-colors" aria-label="Menu">
+                        {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                    </button>
+                </div>
+            </header>
 
             {/* Mobile drawer */}
             <div 
                 style={{ backgroundColor: colors.surface }}
                 className={cn(
-                    "fixed inset-0 top-[56px] z-40 md:hidden transition-transform duration-300 overflow-y-auto",
+                    "fixed inset-0 top-[76px] z-40 md:hidden transition-transform duration-300 overflow-y-auto",
                     isOpen ? "translate-x-0" : "translate-x-full"
                 )}
             >
@@ -265,7 +267,7 @@ export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, s
                     </div>
                 </nav>
             </div>
-        </header>
+        </>
     );
 }
 
