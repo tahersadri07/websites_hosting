@@ -69,24 +69,39 @@ export async function getAdminBusinessSlug(): Promise<string> {
     }
 
     // ── Localhost / same domain: derive from the logged-in user's membership ──
-    // This ensures admin@salon.com sees salon data, admin@rida.com sees rida data.
     try {
         const { createClient } = await import("./supabase/server");
         const supabase = await createClient();
         const { data: { user } } = await supabase.auth.getUser();
 
         if (user) {
-            const { data: membership } = await (supabase as any)
+            console.log(`[AdminContext] User logged in: ${user.email} (${user.id})`);
+            
+            // Simplified query: first get the business_id
+            const { data: memberships, error: memberError } = await supabase
                 .from("memberships")
-                .select("businesses(slug)")
-                .eq("user_id", user.id)
-                .limit(1)
-                .single();
+                .select("business_id, businesses(slug)")
+                .eq("user_id", user.id);
 
+            if (memberError) {
+                console.error("[AdminContext] Membership query error:", memberError);
+            }
+
+            const membership = memberships?.[0];
             const memberSlug = membership?.businesses?.slug;
-            if (memberSlug) return memberSlug;
+            
+            if (memberSlug) {
+                console.log(`[AdminContext] Found membership slug: ${memberSlug}`);
+                return memberSlug;
+            } else {
+                console.log("[AdminContext] No membership found for this user.");
+            }
+        } else {
+            console.log("[AdminContext] No user session found.");
         }
-    } catch { /* fall through */ }
+    } catch (err) { 
+        console.error("[AdminContext] Exception in getAdminBusinessSlug:", err);
+    }
 
     // ── Final fallback ────────────────────────────────────────────────────────
     return process.env.NEXT_PUBLIC_BUSINESS_SLUG ?? "";

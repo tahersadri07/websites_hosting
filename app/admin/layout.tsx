@@ -11,12 +11,21 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     if (!user) redirect("/login");
 
     const slug = await getAdminBusinessSlug();
+    console.log(`[AdminLayout] Derived slug: "${slug}"`);
 
-    const { data: business } = await (supabase as any)
+    const { data: business, error: bizError } = await (supabase as any)
         .from("businesses")
         .select("id, name, slug, primary_color, status, business_type")
         .eq("slug", slug)
-        .single();
+        .maybeSingle();
+
+    if (bizError) {
+        console.error("[AdminLayout] Business fetch error:", bizError);
+    }
+        
+    if (!business) {
+        console.warn(`[AdminLayout] No business found for slug: "${slug}"`);
+    }
         
     const config = getBusinessConfig(business?.business_type);
 
