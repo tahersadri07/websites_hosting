@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { deleteService, toggleServiceActive } from "./actions";
 import { formatCurrency } from "@/lib/utils";
 import { ShareServiceButton } from "@/components/admin/ShareServiceButton";
+import { getBusinessConfig } from "@/lib/business-config";
 
 export default async function ServicesAdminPage() {
     const slug = await getAdminBusinessSlug();
@@ -24,26 +25,29 @@ export default async function ServicesAdminPage() {
         .eq("business_id", business?.id)
         .order("sort_order");
 
+    const config = getBusinessConfig(business?.business_type);
+    const catalogLabel = business?.services_label || config.plural;
+
     const siteUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/sites/${slug}`;
 
     return (
         <div className="max-w-5xl space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold">Services</h2>
-                    <p className="text-muted-foreground text-sm">Manage all your service offerings.</p>
+                    <h2 className="text-2xl font-bold">{catalogLabel}</h2>
+                    <p className="text-muted-foreground text-sm">Manage all your {catalogLabel.toLowerCase()} offerings.</p>
                 </div>
-                <Link href="/admin/services/new">
+                <Link href="/admin/catalog/new">
                     <Button className="bg-business-primary hover:bg-business-primary/90 rounded-xl">
-                        <Plus className="w-4 h-4 mr-2" /> Add Service
+                        <Plus className="w-4 h-4 mr-2" /> Add {config.singular}
                     </Button>
                 </Link>
             </div>
 
             {(!services || services.length === 0) ? (
                 <div className="bg-background border rounded-2xl p-16 text-center text-muted-foreground">
-                    <Scissors className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                    <p>No services yet. Add your first one!</p>
+                    <Package className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                    <p>No {catalogLabel.toLowerCase()} yet. Add your first one!</p>
                 </div>
             ) : (
                 <div className="rounded-2xl border overflow-hidden bg-background">
@@ -96,7 +100,7 @@ export default async function ServicesAdminPage() {
                                     <td className="px-6 py-4">
                                         <div className="flex items-center justify-end space-x-2">
                                             <ShareServiceButton product={svc} business={business} siteUrl={siteUrl} />
-                                            <Link href={`/admin/services/${svc.id}/edit`}>
+                                            <Link href={`/admin/catalog/${svc.id}/edit`}>
                                                 <Button size="sm" variant="outline" className="rounded-lg h-8 w-8 p-0">
                                                     <Pencil className="w-3.5 h-3.5" />
                                                 </Button>

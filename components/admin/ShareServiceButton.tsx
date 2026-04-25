@@ -13,6 +13,7 @@ interface Props {
 
 export function ShareServiceButton({ product, business, siteUrl }: Props) {
     const [isOpen, setIsOpen] = useState(false);
+    const businessType = (business as any)?.business_type || 'service';
 
     const templates = {
         whatsapp: business.marketing_whatsapp_template,
@@ -38,6 +39,7 @@ export function ShareServiceButton({ product, business, siteUrl }: Props) {
                 isOpen={isOpen}
                 onClose={() => setIsOpen(false)}
                 siteUrl={siteUrl}
+                businessType={businessType}
             />
         </>
     );

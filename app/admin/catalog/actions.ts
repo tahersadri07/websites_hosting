@@ -8,7 +8,9 @@ export async function deleteService(formData: FormData) {
     const id = formData.get("id") as string;
     const supabase = await createClient();
     await (supabase as any).from("services").delete().eq("id", id);
-    revalidatePath("/admin/services");
+    const slug = await getAdminBusinessSlug();
+    revalidatePath("/admin/catalog");
+    revalidatePath(`/sites/${slug}`, "layout");
 }
 
 export async function toggleServiceActive(formData: FormData) {
@@ -16,7 +18,9 @@ export async function toggleServiceActive(formData: FormData) {
     const isActive = formData.get("is_active") === "true";
     const supabase = await createClient();
     await (supabase as any).from("services").update({ is_active: !isActive }).eq("id", id);
-    revalidatePath("/admin/services");
+    const slug = await getAdminBusinessSlug();
+    revalidatePath("/admin/catalog");
+    revalidatePath(`/sites/${slug}`, "layout");
 }
 
 export async function upsertService(formData: FormData) {
@@ -44,6 +48,8 @@ export async function upsertService(formData: FormData) {
         thumbnail_url: imageUrls[0] || formData.get("thumbnail_url") || null,
         image_urls: imageUrls,
         item_number: (formData.get("item_number") as string)?.trim() || null,
+        tags: (formData.get("tags") as string)?.split(",").map(t => t.trim()).filter(Boolean) || [],
+        features: (formData.get("features") as string)?.split(",").map(f => f.trim()).filter(Boolean) || [],
         is_active: formData.get("is_active") === "on",
         manage_inventory: formData.get("manage_inventory") === "on",
         stock_quantity: formData.get("stock_quantity") ? Number(formData.get("stock_quantity")) : 0,
@@ -56,7 +62,7 @@ export async function upsertService(formData: FormData) {
         await (supabase as any).from("services").insert(payload);
     }
 
-    revalidatePath("/admin/services");
-    revalidatePath("/services");
-    redirect("/admin/services");
+    revalidatePath("/admin/catalog");
+    revalidatePath(`/sites/${slug}`, "layout");
+    redirect("/admin/catalog");
 }

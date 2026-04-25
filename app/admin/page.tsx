@@ -1,20 +1,19 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAdminBusinessSlug } from "@/lib/admin-context";
 import { Layers, Image as ImageIcon, Star, MessageSquare, TrendingUp, Clock, ArrowUpRight } from "lucide-react";
+import { getBusinessConfig } from "@/lib/business-config";
 
-const statConfig = [
-    { key: "serviceCount",     label: "Products",    icon: Layers,        gradient: "from-indigo-500 to-purple-600",  glow: "shadow-indigo-500/25" },
-    { key: "galleryCount",     label: "Gallery",     icon: ImageIcon,     gradient: "from-blue-500 to-cyan-600",      glow: "shadow-blue-500/25" },
-    { key: "testimonialCount", label: "Reviews",     icon: Star,          gradient: "from-amber-500 to-orange-500",   glow: "shadow-amber-500/25" },
-    { key: "newInquiryCount",  label: "New Inquiries",icon: MessageSquare, gradient: "from-emerald-500 to-teal-600",  glow: "shadow-emerald-500/25" },
-];
+
 
 export default async function AdminDashboard() {
     const supabase = await createClient();
     const slug = await getAdminBusinessSlug();
 
     const { data: business } = await (supabase as any)
-        .from("businesses").select("id, name, status").eq("slug", slug).single();
+        .from("businesses")
+        .select("id, name, status, business_type, services_label")
+        .eq("slug", slug)
+        .single();
 
     if (!business) {
         return (
@@ -31,12 +30,22 @@ export default async function AdminDashboard() {
         (supabase as any).from("contact_inquiries").select("id, name, message, status, created_at").eq("business_id", business.id).order("created_at", { ascending: false }).limit(10),
     ]);
 
+    const config = getBusinessConfig(business.business_type);
+    const servicesLabel = business.services_label || config.plural;
+
     const stats = {
         serviceCount:     services.count ?? 0,
         galleryCount:     gallery.count ?? 0,
         testimonialCount: testimonials.count ?? 0,
         newInquiryCount:  (inquiries.data ?? []).filter((i: any) => i.status === "new").length,
     };
+
+    const dashboardStats = [
+        { key: "serviceCount",     label: servicesLabel,    icon: Layers,        gradient: "from-indigo-500 to-purple-600",  glow: "shadow-indigo-500/25" },
+        { key: "galleryCount",     label: "Gallery",     icon: ImageIcon,     gradient: "from-blue-500 to-cyan-600",      glow: "shadow-blue-500/25" },
+        { key: "testimonialCount", label: "Reviews",     icon: Star,          gradient: "from-amber-500 to-orange-500",   glow: "shadow-amber-500/25" },
+        { key: "newInquiryCount",  label: "New Inquiries",icon: MessageSquare, gradient: "from-emerald-500 to-teal-600",  glow: "shadow-emerald-500/25" },
+    ];
 
     const recentInquiries = inquiries.data ?? [];
 
@@ -68,7 +77,7 @@ export default async function AdminDashboard() {
 
             {/* KPI Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {statConfig.map((cfg) => (
+                {dashboardStats.map((cfg) => (
                     <div key={cfg.key} className="kpi-card group cursor-default">
                         <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${cfg.gradient} shadow-lg ${cfg.glow} flex items-center justify-center mb-4`}>
                             <cfg.icon className="w-4 h-4 text-white" />
@@ -160,7 +169,7 @@ export default async function AdminDashboard() {
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {[
-                        { label: "Add Product",     href: "/admin/services/new" },
+                        { label: `Add ${business.services_label || config.singular}`, href: "/admin/catalog/new" },
                         { label: "Upload Photo",    href: "/admin/gallery" },
                         { label: "Add Review",      href: "/admin/testimonials" },
                         { label: "View Settings",   href: "/admin/settings" },

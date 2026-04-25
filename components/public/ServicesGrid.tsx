@@ -22,6 +22,7 @@ interface Service {
     thumbnail_url: string | null;
     item_number?: string | number | null;
     category_id?: string | null;
+    tags?: string[] | null;
     business_id?: string;
 }
 
@@ -31,9 +32,10 @@ interface ServicesGridProps {
     limit?: number;
     currencySymbol?: string | null;
     siteSlug?: string | null;
+    catalogType?: string;
 }
 
-export function ServicesGrid({ services, categories = [], limit, currencySymbol = "₹", siteSlug }: ServicesGridProps) {
+export function ServicesGrid({ services, categories = [], limit, currencySymbol = "₹", siteSlug, catalogType = "services" }: ServicesGridProps) {
     const searchParams = useSearchParams();
     const categoryParam = searchParams.get("category");
     const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(categoryParam);
@@ -52,7 +54,7 @@ export function ServicesGrid({ services, categories = [], limit, currencySymbol 
     }, [services, selectedCategoryId]);
 
     const display = limit ? filteredServices.slice(0, limit) : filteredServices;
-    const serviceBase = siteSlug ? `/sites/${siteSlug}/services` : "/services";
+    const serviceBase = siteSlug ? `/sites/${siteSlug}/${catalogType}` : `/${catalogType}`;
 
     if (services.length === 0) return null;
 
@@ -152,6 +154,17 @@ export function ServicesGrid({ services, categories = [], limit, currencySymbol 
                                         <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed flex-grow">
                                             {service.description}
                                         </p>
+                                    )}
+
+                                    {/* Tags */}
+                                    {service.tags && service.tags.length > 0 && (
+                                        <div className="flex flex-wrap gap-1 mt-3">
+                                            {service.tags.slice(0, 3).map((tag, i) => (
+                                                <span key={i} className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                                                    {tag}
+                                                </span>
+                                            ))}
+                                        </div>
                                     )}
 
                                     {service.duration_minutes && (

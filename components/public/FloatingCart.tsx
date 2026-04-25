@@ -26,9 +26,12 @@ interface Props {
     currencySymbol: string;
     upiId?: string | null;
     onlinePaymentsEnabled?: boolean;
+    template?: any;
 }
 
-export function FloatingCart({ businessId, businessName, whatsappNumber, currencySymbol, upiId, onlinePaymentsEnabled = true }: Props) {
+export function FloatingCart({ businessId, businessName, whatsappNumber, currencySymbol, upiId, onlinePaymentsEnabled = true, template }: Props) {
+    const colors = template?.colors || { bg: "#0A0A0F", border: "#27272A", text: "#FFFFFF", textMuted: "#A1A1AA", primary: "#6366F1", surface: "#13131A" };
+
     const { 
         items, wishlist, itemCount, wishlistCount, totalPrice, 
         updateQuantity, removeFromCart, clearCart, 
@@ -205,7 +208,7 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
                             <div className="absolute -top-1 -right-1 w-5 h-5 bg-business-primary text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-lg border-2 border-white animate-bounce">
                                 {itemCount}
                             </div>
-                            <div className="w-14 h-14 bg-business-primary text-white rounded-2xl flex items-center justify-center shadow-2xl transition-all group-hover:scale-110 group-hover:rotate-6">
+                            <div style={{ background: colors.primary, color: "#fff" }} className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-2xl transition-all group-hover:scale-110 group-hover:rotate-6">
                                 <ShoppingBag className="w-6 h-6" />
                             </div>
                         </div>
@@ -214,15 +217,16 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
             )}
 
             <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-                <SheetContent className="w-full sm:max-w-md p-0 flex flex-col border-none shadow-2xl">
-                    <SheetHeader className="p-6 bg-zinc-900 text-white">
+                <SheetContent style={{ background: colors.bg, borderColor: colors.border }} className="w-full sm:max-w-md p-0 flex flex-col border-none shadow-2xl">
+                    <SheetHeader style={{ background: colors.surface }} className="p-6">
                         <div className="flex items-center gap-4 mb-4">
                             <button 
                                 onClick={() => setActiveTab("cart")}
                                 className={cn(
                                     "flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-all",
-                                    activeTab === "cart" ? "bg-business-primary text-white" : "bg-white/5 text-zinc-400 hover:bg-white/10"
+                                    activeTab === "cart" ? "text-white" : "text-zinc-400 hover:opacity-80"
                                 )}
+                                style={{ background: activeTab === "cart" ? colors.primary : `${colors.bg}66` }}
                             >
                                 <ShoppingCart className="w-4 h-4" />
                                 Cart ({itemCount})
@@ -238,7 +242,7 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
                                 Wishlist ({wishlistCount})
                             </button>
                         </div>
-                        <SheetTitle className="text-white text-xl">
+                        <SheetTitle style={{ color: colors.text }} className="text-xl">
                             {activeTab === "cart" ? (
                                 step === "review" ? "Shopping Cart" : 
                                 step === "details" ? "Checkout Details" : 
@@ -271,16 +275,16 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
                                                 </div>
                                                 <div className="flex-grow flex flex-col justify-between py-1">
                                                     <div>
-                                                        <h4 className="font-bold text-sm leading-tight text-zinc-900">{item.title}</h4>
-                                                        <p className="text-xs text-zinc-500 mt-1">{currencySymbol}{item.price?.toLocaleString()}</p>
+                                                        <h4 style={{ color: colors.text }} className="font-bold text-sm leading-tight">{item.title}</h4>
+                                                        <p style={{ color: colors.textMuted }} className="text-xs mt-1">{currencySymbol}{item.price?.toLocaleString()}</p>
                                                     </div>
                                                     <div className="flex items-center justify-between">
-                                                        <div className="flex items-center gap-2 bg-zinc-100 rounded-lg p-1">
-                                                            <button onClick={() => updateQuantity(item.id, -1)} className="w-6 h-6 flex items-center justify-center hover:text-business-primary"><Minus className="w-3 h-3" /></button>
-                                                            <span className="text-xs font-bold w-4 text-center">{item.quantity}</span>
-                                                            <button onClick={() => updateQuantity(item.id, 1)} className="w-6 h-6 flex items-center justify-center hover:text-business-primary"><Plus className="w-3 h-3" /></button>
+                                                        <div style={{ background: colors.bg }} className="flex items-center gap-2 rounded-lg p-1">
+                                                            <button onClick={() => updateQuantity(item.id, -1)} style={{ color: colors.textMuted }} className="w-6 h-6 flex items-center justify-center hover:opacity-70"><Minus className="w-3 h-3" /></button>
+                                                            <span style={{ color: colors.text }} className="text-xs font-bold w-4 text-center">{item.quantity}</span>
+                                                            <button onClick={() => updateQuantity(item.id, 1)} style={{ color: colors.textMuted }} className="w-6 h-6 flex items-center justify-center hover:opacity-70"><Plus className="w-3 h-3" /></button>
                                                         </div>
-                                                        <button onClick={() => removeFromCart(item.id)} className="text-zinc-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                                                        <button onClick={() => removeFromCart(item.id)} style={{ color: colors.textMuted }} className="hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -290,16 +294,16 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
                             ) : step === "details" ? (
                                 <div className="space-y-5">
                                     <div className="space-y-2">
-                                        <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Full Name</Label>
-                                        <Input value={details.name} onChange={(e) => setDetails({...details, name: e.target.value})} placeholder="Your Name" className="h-12 rounded-xl" />
+                                        <Label style={{ color: colors.textMuted }} className="text-xs font-bold uppercase tracking-wider">Full Name</Label>
+                                        <Input style={{ background: colors.bg, borderColor: colors.border, color: colors.text }} value={details.name} onChange={(e) => setDetails({...details, name: e.target.value})} placeholder="Your Name" className="h-12 rounded-xl" />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Phone Number</Label>
-                                        <Input value={details.phone} onChange={(e) => setDetails({...details, phone: e.target.value})} placeholder="+91 ..." className="h-12 rounded-xl" />
+                                        <Label style={{ color: colors.textMuted }} className="text-xs font-bold uppercase tracking-wider">Phone Number</Label>
+                                        <Input style={{ background: colors.bg, borderColor: colors.border, color: colors.text }} value={details.phone} onChange={(e) => setDetails({...details, phone: e.target.value})} placeholder="+91 ..." className="h-12 rounded-xl" />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Delivery Address</Label>
-                                        <Input value={details.address} onChange={(e) => setDetails({...details, address: e.target.value})} placeholder="Address" className="h-12 rounded-xl" />
+                                        <Label style={{ color: colors.textMuted }} className="text-xs font-bold uppercase tracking-wider">Delivery Address</Label>
+                                        <Input style={{ background: colors.bg, borderColor: colors.border, color: colors.text }} value={details.address} onChange={(e) => setDetails({...details, address: e.target.value})} placeholder="Address" className="h-12 rounded-xl" />
                                     </div>
                                 </div>
                             ) : (
@@ -311,8 +315,13 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
                                                 onClick={() => setPaymentMethod("cash")}
                                                 className={cn(
                                                     "p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 text-center",
-                                                    paymentMethod === "cash" ? "border-business-primary bg-business-primary/5 text-business-primary" : "border-transparent bg-background text-zinc-500 hover:bg-muted"
+                                                    paymentMethod === "cash" ? "bg-opacity-10" : "border-transparent bg-background text-zinc-500 hover:opacity-80"
                                                 )}
+                                                style={{ 
+                                                    borderColor: paymentMethod === "cash" ? colors.primary : "transparent",
+                                                    backgroundColor: paymentMethod === "cash" ? `${colors.primary}1A` : colors.bg,
+                                                    color: paymentMethod === "cash" ? colors.primary : colors.textMuted
+                                                }}
                                             >
                                                 <span className="font-bold text-sm">Pay Later</span>
                                                 <span className="text-[10px]">Cash or Transfer later</span>
@@ -353,8 +362,8 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
 
                                     {paymentMethod === "manual_upi" && upiId && (
                                         <div className="space-y-4 animate-in fade-in slide-in-from-top-4">
-                                            <div className="p-5 rounded-2xl bg-[#0A0A0F] border border-[#27272A] text-center flex flex-col items-center">
-                                                <p className="text-sm text-zinc-400 mb-4">Pay directly via your UPI app (GPay, PhonePe, Paytm)</p>
+                                            <div style={{ background: colors.surface, borderColor: colors.border }} className="p-5 rounded-2xl border text-center flex flex-col items-center">
+                                                <p style={{ color: colors.textMuted }} className="text-sm mb-4">Pay directly via your UPI app (GPay, PhonePe, Paytm)</p>
                                                 
                                                 {/* Dynamic QR Code */}
                                                 <div className="bg-white p-2 rounded-xl mb-4 w-40 h-40">
@@ -388,8 +397,8 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
 
                                     {paymentMethod === "razorpay" && (
                                         <div className="space-y-4 animate-in fade-in slide-in-from-top-4">
-                                            <div className="p-5 rounded-2xl bg-[#0A0A0F] border border-[#27272A] text-center flex flex-col items-center">
-                                                <p className="text-sm text-zinc-400 mb-4">Pay securely with Credit/Debit Card, UPI, Netbanking, or Wallets.</p>
+                                            <div style={{ background: colors.surface, borderColor: colors.border }} className="p-5 rounded-2xl border text-center flex flex-col items-center">
+                                                <p style={{ color: colors.textMuted }} className="text-sm mb-4">Pay securely with Credit/Debit Card, UPI, Netbanking, or Wallets.</p>
                                                 
                                                 <Button 
                                                     onClick={handleRazorpayCheckout}
@@ -459,7 +468,9 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
                                     <span className="text-2xl font-black text-business-primary">{currencySymbol}{totalPrice.toLocaleString()}</span>
                                 </div>
                                 {step === "review" ? (
-                                    <Button onClick={() => setStep("details")} className="w-full py-7 rounded-2xl text-base font-bold bg-zinc-900 hover:bg-zinc-800 shadow-xl">
+                                    <Button onClick={() => setStep("details")} 
+                                        style={{ background: colors.primary, color: "#fff" }}
+                                        className="w-full py-7 rounded-2xl text-base font-bold shadow-xl hover:opacity-90">
                                         Proceed to Checkout
                                     </Button>
                                 ) : step === "details" ? (

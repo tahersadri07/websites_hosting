@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Plus, Loader2, AlertCircle } from "lucide-react";
 import { createBusiness } from "@/app/superadmin/actions";
 
-const BUSINESS_TYPES = ["service", "retail", "garment", "food", "salon", "clinic", "education", "tech", "other"];
+const BUSINESS_TYPES = ["product", "service"];
 const CURRENCIES = [
     { symbol: "₹", label: "INR (₹)" },
     { symbol: "$", label: "USD ($)" },

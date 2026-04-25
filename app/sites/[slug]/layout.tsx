@@ -11,6 +11,7 @@ import { Construction } from "lucide-react";
 import { headers } from "next/headers";
 import { CartProvider } from "@/context/CartContext";
 import { FloatingCart } from "@/components/public/FloatingCart";
+import { getBusinessConfig } from "@/lib/business-config";
 
 interface Props {
     children: React.ReactNode;
@@ -83,6 +84,7 @@ export default async function SiteLayout({ children, params }: Props) {
     };
 
     const onlinePaymentsEnabled = (business as any).business_tools?.some((t: any) => t.tool_key === 'online_payments' && t.is_enabled) ?? false;
+    const config = getBusinessConfig((business as any).business_type);
 
     return (
         <NextIntlClientProvider locale={locale} messages={messages}>
@@ -102,6 +104,7 @@ export default async function SiteLayout({ children, params }: Props) {
                             siteSlug={isCustomDomain ? null : slug}
                             template={template}
                             categories={categories ?? []}
+                            businessConfig={config}
                         />
                         <main className="flex-grow">{children}</main>
                         <Footer
@@ -113,8 +116,10 @@ export default async function SiteLayout({ children, params }: Props) {
                             socials={socials}
                             template={template}
                             siteSlug={isCustomDomain ? null : slug}
+                            businessConfig={config}
+                            servicesLabel={business.services_label}
                         />
-                        {business.whatsapp && <FloatingWhatsApp phone={business.whatsapp} />}
+                        {business.whatsapp && <FloatingWhatsApp phone={business.whatsapp} template={template} />}
                         <FloatingCart 
                             businessId={business.id}
                             businessName={business.name} 
@@ -122,6 +127,7 @@ export default async function SiteLayout({ children, params }: Props) {
                             currencySymbol={(business as any).currency_symbol ?? "₹"}
                             upiId={(business as any).upi_id ?? null}
                             onlinePaymentsEnabled={onlinePaymentsEnabled}
+                            template={template}
                         />
                     </div>
                 </ThemeProvider>

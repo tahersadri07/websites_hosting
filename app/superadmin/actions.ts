@@ -31,18 +31,22 @@ export async function setBusinessStatus(formData: FormData) {
     const id     = formData.get("id")     as string;
     const status = formData.get("status") as string;
     const db = createServiceClient();
+    const { data: business } = await db.from("businesses").select("slug").eq("id", id).single();
     await db.from("businesses").update({ status }).eq("id", id);
     revalidatePath("/superadmin");
     revalidatePath(`/superadmin/clients/${id}`);
+    if (business?.slug) revalidatePath(`/sites/${business.slug}`, "layout");
 }
 
 export async function setBusinessTemplate(formData: FormData) {
     const id       = formData.get("id")       as string;
     const template = formData.get("template") as string;
     const db = createServiceClient();
+    const { data: business } = await db.from("businesses").select("slug").eq("id", id).single();
     await (db as any).from("businesses").update({ template }).eq("id", id);
     revalidatePath("/superadmin");
     revalidatePath(`/superadmin/clients/${id}`);
+    if (business?.slug) revalidatePath(`/sites/${business.slug}`, "layout");
 }
 
 export async function toggleBusinessTool(formData: FormData) {
@@ -102,14 +106,27 @@ export async function inviteAdminUser(formData: FormData) {
     const db = createServiceClient();
 
     // 1. Create auth user (service role can do this)
+    let userId: string | undefined;
     const { data: authData, error: authError } = await db.auth.admin.createUser({
         email,
         password,
         email_confirm: true,   // auto-confirm so they can login immediately
     });
 
-    if (authError) throw new Error(`Auth error: ${authError.message}`);
-    const userId = authData.user?.id;
+    if (authError) {
+        // If user already exists, we find them and just re-link
+        if (authError.message.includes("already been registered")) {
+            const { data: { users }, error: listError } = await db.auth.admin.listUsers();
+            const existingUser = users.find(u => u.email?.toLowerCase() === email.toLowerCase());
+            if (!existingUser) throw new Error("User exists in Auth but could not be found in list.");
+            userId = existingUser.id;
+        } else {
+            throw new Error(`Auth error: ${authError.message}`);
+        }
+    } else {
+        userId = authData.user?.id;
+    }
+
     if (!userId) throw new Error("No user ID returned");
 
     // 2. Remove any existing memberships for this user (avoid duplicates)
@@ -160,4 +177,29 @@ export async function removeAdminUser(formData: FormData) {
     const db = createServiceClient();
     await db.from("memberships").delete().eq("id", membership_id);
     revalidatePath(`/superadmin/clients/${business_id}`);
+}
+
+export async function updateBusiness(formData: FormData) {
+    const db = createServiceClient();
+    const id              = formData.get("id")              as string;
+    const name            = formData.get("name")            as string;
+    const slug            = formData.get("slug")            as string;
+    const business_type   = formData.get("business_type")   as string;
+    const services_label  = formData.get("services_label")  as string;
+    const currency_symbol = formData.get("currency_symbol") as string;
+    const primary_color   = formData.get("primary_color")   as string;
+    const secondary_color = formData.get("secondary_color") as string;
+
+    const tagline         = formData.get("tagline")         as string;
+    const description     = formData.get("description")     as string;
+ 
+    const { error } = await db.from("businesses").update({
+        name, slug, tagline, description, business_type, services_label, currency_symbol, primary_color, secondary_color,
+    }).eq("id", id);
+
+    if (error) throw new Error(error.message);
+
+    revalidatePath(`/superadmin/clients/${id}`);
+    revalidatePath("/superadmin");
+    revalidatePath(`/sites/${slug}`, "layout");
 }

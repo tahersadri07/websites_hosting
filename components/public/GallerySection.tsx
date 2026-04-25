@@ -11,7 +11,9 @@ interface GalleryImage {
     alt_text: string | null;
 }
 
-export function GallerySection({ images, limit }: { images: GalleryImage[]; limit?: number }) {
+export function GallerySection({ images, limit, template }: { images: GalleryImage[]; limit?: number; template?: any }) {
+    const colors = template?.colors || { bg: "#0A0A0F", border: "#27272A", text: "#FFFFFF", textMuted: "#A1A1AA", primary: "#6366F1", surface: "#13131A" };
+
     const display = limit ? images.slice(0, limit) : images;
     const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
 
@@ -21,22 +23,22 @@ export function GallerySection({ images, limit }: { images: GalleryImage[]; limi
     const next = () => setLightboxIdx(i => i !== null ? (i + 1) % display.length : null);
 
     return (
-        <section className="py-24 relative overflow-hidden">
+        <section style={{ background: colors.bg }} className="py-24 relative overflow-hidden">
             {/* Glow */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-indigo-600/6 rounded-full blur-[80px] pointer-events-none" />
+            <div style={{ background: colors.primary }} className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] rounded-full blur-[80px] pointer-events-none opacity-5" />
 
             <div className="container mx-auto px-6 max-w-7xl relative">
                 {/* Header */}
                 <div className="flex items-end justify-between mb-12">
                     <div>
-                        <div className="inline-flex items-center gap-2 text-xs font-semibold text-blue-400 uppercase tracking-widest mb-3">
-                            <span className="w-4 h-px bg-blue-400" />
+                        <div style={{ color: colors.primary }} className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest mb-3">
+                            <span style={{ background: colors.primary }} className="w-4 h-px" />
                             Our Work
                         </div>
-                        <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Gallery</h2>
+                        <h2 style={{ color: colors.text }} className="text-3xl md:text-4xl font-bold tracking-tight">Gallery</h2>
                     </div>
                     {limit && images.length > limit && (
-                        <span className="text-xs text-zinc-600">{images.length} photos</span>
+                        <span style={{ color: colors.textMuted }} className="text-xs">{images.length} photos</span>
                     )}
                 </div>
 
@@ -46,7 +48,8 @@ export function GallerySection({ images, limit }: { images: GalleryImage[]; limi
                         <button
                             key={img.id}
                             onClick={() => setLightboxIdx(i)}
-                            className={`group relative overflow-hidden rounded-xl border border-[#27272A] hover:border-indigo-500/40 transition-all duration-300 cursor-zoom-in
+                            style={{ borderColor: colors.border, borderRadius: template?.style.cardRadius === 'rounded-none' ? '0' : '12px' }}
+                            className={`group relative overflow-hidden border transition-all duration-300 cursor-zoom-in
                                 ${i === 0 ? "col-span-2 row-span-2 aspect-square" : "aspect-square"}`}
                         >
                             <Image
@@ -55,8 +58,8 @@ export function GallerySection({ images, limit }: { images: GalleryImage[]; limi
                                 unoptimized
                             />
                             {/* Hover overlay */}
-                            <div className="absolute inset-0 bg-[#0A0A0F]/0 group-hover:bg-[#0A0A0F]/40 transition-colors duration-300 flex items-center justify-center">
-                                <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                            <div style={{ backgroundColor: `${colors.bg}66` }} className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                <ZoomIn style={{ color: colors.text }} className="w-6 h-6" />
                             </div>
                         </button>
                     ))}
@@ -66,24 +69,28 @@ export function GallerySection({ images, limit }: { images: GalleryImage[]; limi
             {/* Lightbox */}
             {lightboxIdx !== null && (
                 <div
-                    className="fixed inset-0 z-50 bg-[#0A0A0F]/95 backdrop-blur-xl flex items-center justify-center p-4"
+                    style={{ backgroundColor: `${colors.bg}F2` }}
+                    className="fixed inset-0 z-50 backdrop-blur-xl flex items-center justify-center p-4"
                     onClick={() => setLightboxIdx(null)}
                 >
                     <button
                         onClick={e => { e.stopPropagation(); setLightboxIdx(null); }}
-                        className="absolute top-5 right-5 w-9 h-9 rounded-xl border border-[#27272A] bg-[#13131A] flex items-center justify-center text-zinc-400 hover:text-white hover:border-zinc-600 transition-all z-10"
+                        style={{ backgroundColor: colors.surface, borderColor: colors.border, color: colors.textMuted, borderRadius: template?.style.heroRadius === 'rounded-none' ? '0' : '8px' }}
+                        className="absolute top-5 right-5 w-9 h-9 border flex items-center justify-center hover:opacity-80 transition-all z-10"
                     >
                         <X className="w-4 h-4" />
                     </button>
                     <button
                         onClick={e => { e.stopPropagation(); prev(); }}
-                        className="absolute left-5 w-9 h-9 rounded-xl border border-[#27272A] bg-[#13131A] flex items-center justify-center text-zinc-400 hover:text-white transition-all z-10"
+                        style={{ backgroundColor: colors.surface, borderColor: colors.border, color: colors.textMuted }}
+                        className="absolute left-5 w-9 h-9 rounded-xl border flex items-center justify-center hover:opacity-80 transition-all z-10"
                     >
                         <ChevronLeft className="w-4 h-4" />
                     </button>
                     <button
                         onClick={e => { e.stopPropagation(); next(); }}
-                        className="absolute right-5 w-9 h-9 rounded-xl border border-[#27272A] bg-[#13131A] flex items-center justify-center text-zinc-400 hover:text-white transition-all z-10"
+                        style={{ backgroundColor: colors.surface, borderColor: colors.border, color: colors.textMuted }}
+                        className="absolute right-5 w-9 h-9 rounded-xl border flex items-center justify-center hover:opacity-80 transition-all z-10"
                     >
                         <ChevronRight className="w-4 h-4" />
                     </button>
@@ -97,11 +104,12 @@ export function GallerySection({ images, limit }: { images: GalleryImage[]; limi
                         />
                     </div>
                     {display[lightboxIdx].caption && (
-                        <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-sm text-zinc-400 bg-[#13131A] border border-[#27272A] px-4 py-2 rounded-xl max-w-md text-center">
+                        <p style={{ backgroundColor: colors.surface, borderColor: colors.border, color: colors.textMuted }}
+                            className="absolute bottom-6 left-1/2 -translate-x-1/2 text-sm border px-4 py-2 rounded-xl max-w-md text-center">
                             {display[lightboxIdx].caption}
                         </p>
                     )}
-                    <p className="absolute bottom-6 right-6 text-xs text-zinc-700 font-mono">
+                    <p style={{ color: colors.textMuted }} className="absolute bottom-6 right-6 text-[10px] font-bold tracking-widest uppercase opacity-40">
                         {lightboxIdx + 1} / {display.length}
                     </p>
                 </div>

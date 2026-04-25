@@ -40,11 +40,12 @@ interface Props {
         services_label?: string | null;
     };
     siteSlug: string;
+    catalogType?: string;
     template: TemplateConfig;
     relatedServices?: Service[];
 }
 
-export function ProductDetailPage({ service, business, siteSlug, template, relatedServices = [] }: Props) {
+export function ProductDetailPage({ service, business, siteSlug, catalogType = "services", template, relatedServices = [] }: Props) {
     const [copied, setCopied] = useState(false);
     const [activeImage, setActiveImage] = useState<string | null>(service.image_urls?.[0] || service.thumbnail_url || null);
     const { colors, style } = template;
@@ -54,7 +55,7 @@ export function ProductDetailPage({ service, business, siteSlug, template, relat
 
     const currency = business.currency_symbol ?? "₹";
     const itemLabel = business.services_label ?? "Products & Services";
-    const backHref = `/sites/${siteSlug}/services`;
+    const backHref = `/sites/${siteSlug}/${catalogType}`;
 
     const allImages = [
         ...(service.image_urls || []),
@@ -200,23 +201,48 @@ export function ProductDetailPage({ service, business, siteSlug, template, relat
                     <div className="flex flex-col gap-6">
 
                         {/* Item number badge */}
-                        <div className="flex items-center gap-3 flex-wrap">
+                        <div className="flex items-center gap-2 flex-wrap">
                             <span
-                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border"
-                                style={{ color: colors.primary, borderColor: colors.primary + "40", background: colors.primary + "12" }}
+                                className="inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold border uppercase tracking-widest"
+                                style={{ 
+                                    color: colors.primary, 
+                                    borderColor: colors.primary + "40", 
+                                    background: colors.surface,
+                                    borderRadius: template.style.heroRadius === 'rounded-none' ? '0' : '4px'
+                                }}
                             >
                                 <Hash className="w-3 h-3" />
                                 Item {itemNum}
                             </span>
                             {service.duration_minutes && (
                                 <span
-                                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border"
-                                    style={{ color: colors.textMuted, borderColor: colors.border, background: colors.surface }}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold border uppercase tracking-widest"
+                                    style={{ 
+                                        color: colors.textMuted, 
+                                        borderColor: colors.border, 
+                                        background: colors.surface,
+                                        borderRadius: template.style.heroRadius === 'rounded-none' ? '0' : '4px'
+                                    }}
                                 >
                                     <Clock className="w-3 h-3" />
                                     {service.duration_minutes} min
                                 </span>
                             )}
+                            {service.tags?.map((tag, i) => (
+                                <span
+                                    key={i}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold border uppercase tracking-widest"
+                                    style={{ 
+                                        color: colors.accent, 
+                                        borderColor: colors.accent + "40", 
+                                        background: colors.surface,
+                                        borderRadius: template.style.heroRadius === 'rounded-none' ? '0' : '4px'
+                                    }}
+                                >
+                                    <Tag className="w-3 h-3" />
+                                    {tag}
+                                </span>
+                            ))}
                         </div>
 
                         {/* Title */}
@@ -253,17 +279,25 @@ export function ProductDetailPage({ service, business, siteSlug, template, relat
                         </div>
 
                         {/* Feature highlights */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            {features.map((f, i) => (
-                                <div
-                                    key={i}
-                                    className="flex items-center gap-2 p-3 rounded-xl border text-sm"
-                                    style={{ background: colors.surface, borderColor: colors.border, color: colors.text }}
-                                >
-                                    <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: colors.primary }} />
-                                    <span>{f}</span>
-                                </div>
-                            ))}
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: colors.text }}>What&apos;s Included</h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {features.map((f, i) => (
+                                    <div
+                                        key={i}
+                                        className="flex items-center gap-2 p-3 border text-xs font-medium"
+                                        style={{ 
+                                            background: colors.surface, 
+                                            borderColor: colors.border, 
+                                            color: colors.text,
+                                            borderRadius: template.style.cardRadius === 'rounded-none' ? '0' : '12px'
+                                        }}
+                                    >
+                                        <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: colors.primary }} />
+                                        <span>{f}</span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
 
                         {/* Inventory Status */}
@@ -408,7 +442,7 @@ export function ProductDetailPage({ service, business, siteSlug, template, relat
                                 return (
                                     <Link
                                         key={rel.id}
-                                        href={`/sites/${siteSlug}/services/${rel.slug}`}
+                                        href={`/sites/${siteSlug}/${catalogType}/${rel.slug}`}
                                         className={`group ${style.cardRadius} border overflow-hidden flex flex-col transition-all duration-200 hover:opacity-90`}
                                         style={{
                                             background: colors.surface,

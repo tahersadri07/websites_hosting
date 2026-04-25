@@ -7,6 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { MessageCircle, Camera, Copy, Check, Megaphone, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getBusinessConfig } from "@/lib/business-config";
 
 interface Props {
     product: any;
@@ -18,12 +19,14 @@ interface Props {
     isOpen: boolean;
     onClose: () => void;
     siteUrl: string;
+    businessType?: string;
 }
 
-export function MarketingModal({ product, templates, isOpen, onClose, siteUrl }: Props) {
+export function MarketingModal({ product, templates, isOpen, onClose, siteUrl, businessType = 'service' }: Props) {
     const [copied, setCopied] = useState<string | null>(null);
 
-    const productUrl = `${siteUrl}/services/${product.slug}`;
+    const config = getBusinessConfig(businessType);
+    const productUrl = `${siteUrl}/${config.urlPath}/${product.slug}`;
     
     const replaceVars = (template: string | null | undefined) => {
         if (!template) return "";

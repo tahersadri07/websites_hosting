@@ -168,6 +168,85 @@ export const TEMPLATES: Record<string, TemplateConfig> = {
             navStyle:    "glass",
         },
     },
+
+    // ── 6. Influencer Vibe ──────────────────────────────────────────────────────
+    "influencer-vibe": {
+        key: "influencer-vibe",
+        name: "Influencer Vibe",
+        description: "Vibrant, high-energy, and modern — perfect for creators, agencies, and social media platforms. Featuring neon gradients and soft glassmorphism.",
+        category: "Creative & Digital",
+        preview: "linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #EC4899 100%)",
+        colors: {
+            primary:   "#EC4899", // Vibrant Pink
+            secondary: "#8B5CF6", // Violet
+            accent:    "#06B6D4", // Cyan
+            bg:        "#0F172A", // Deep Navy
+            surface:   "#1E293B", // Slate
+            border:    "#334155",
+            text:      "#F8FAFC",
+            textMuted: "#94A3B8",
+        },
+        fonts: { heading: "Outfit", body: "Inter" },
+        style: {
+            heroLayout:  "split-left",
+            heroRadius:  "rounded-2xl",
+            cardRadius:  "rounded-[2rem]",
+            cardShadow:  "shadow-pink-500/10",
+            navStyle:    "glass",
+        },
+    },
+    // ── 7. Rose Gold Jewelry ────────────────────────────────────────────────────
+    "rose-gold-jewelry": {
+        key: "rose-gold-jewelry",
+        name: "Rose Gold Jewelry",
+        description: "Boutique luxury — blush pink, pure white, and gold accents. Feminine, romantic, and premium.",
+        category: "Luxury & Fashion",
+        preview: "linear-gradient(135deg, #FFFFFF 0%, #f8d7e3 50%, #D4AF37 100%)",
+        colors: {
+            primary:   "#D4AF37", // Subtle Gold Accent
+            secondary: "#f8d7e3", // Blush Pink
+            accent:    "#C5A059", // Deep Gold
+            bg:        "#FFFFFF", // Clean, minimal white space
+            surface:   "#FFF9FA", // Soft Ethereal Blush Surface
+            border:    "#f8d7e3", 
+            text:      "#4A3B3D", // Charcoal Rose (Premium contrast)
+            textMuted: "#8E7A7D",
+        },
+        fonts: { heading: "Cormorant Garamond", body: "Montserrat" },
+        style: {
+            heroLayout:  "split-right",
+            heroRadius:  "rounded-3xl", // Smooth curves as requested
+            cardRadius:  "rounded-[2.5rem]", // Very smooth, high-end
+            cardShadow:  "0 20px 40px -15px rgba(248, 215, 227, 0.3)",
+            navStyle:    "glass",
+        },
+    },
+    // ── 8. Blush Jewelry Reverse ───────────────────────────────────────────────
+    "blush-jewelry-reverse": {
+        key: "blush-jewelry-reverse",
+        name: "Blush Jewelry (Reverse)",
+        description: "Bold & Boutique — pink background with pure white typography. High-contrast luxury.",
+        category: "Luxury & Fashion",
+        preview: "linear-gradient(135deg, #f8d7e3 0%, #FFFFFF 100%)",
+        colors: {
+            primary:   "#D4AF37", // Gold for buttons
+            secondary: "#3D2B2D", // Deep Rosewood for contrast
+            accent:    "#D4AF37",
+            bg:        "#f8d7e3", // Pink background
+            surface:   "#fae1ea", // Slightly darker pink for surfaces
+            border:    "#3d2b2d20", 
+            text:      "#3D2B2D", // Deep Rosewood (High contrast)
+            textMuted: "#6B5356",
+        },
+        fonts: { heading: "Cormorant Garamond", body: "Montserrat" },
+        style: {
+            heroLayout:  "split-right",
+            heroRadius:  "rounded-3xl",
+            cardRadius:  "rounded-[2.5rem]",
+            cardShadow:  "0 20px 40px -15px rgba(0, 0, 0, 0.1)",
+            navStyle:    "glass",
+        },
+    },
 };
 
 export const DEFAULT_TEMPLATE = "dark-minimal";

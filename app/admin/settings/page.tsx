@@ -34,11 +34,19 @@ export default async function SettingsPage() {
             <form action={updateSettings} className="space-y-8">
                 <input type="hidden" name="id" value={b.id} />
 
-                {/* Logo Upload */}
-                <div className="bg-background rounded-2xl border p-8 space-y-4">
-                    <h3 className="font-semibold text-lg border-b pb-4">Business Logo</h3>
-                    <ImageUploader name="logo_url" defaultUrl={b.logo_url ?? ""} folder="logos" aspectRatio="3/1" label="Business Logo" />
-                    <p className="text-xs text-muted-foreground">Recommended: 600×200 px, PNG or SVG with transparent background.</p>
+                {/* Logo & Showcase Uploads */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-background rounded-2xl border p-8 space-y-4">
+                        <h3 className="font-semibold text-lg border-b pb-4">Business Logo</h3>
+                        <ImageUploader name="logo_url" defaultUrl={b.logo_url ?? ""} folder="logos" aspectRatio="3/1" label="Business Logo" />
+                        <p className="text-xs text-muted-foreground">Recommended: 600×200 px, PNG/SVG.</p>
+                    </div>
+
+                    <div className="bg-background rounded-2xl border p-8 space-y-4">
+                        <h3 className="font-semibold text-lg border-b pb-4">Showcase Area</h3>
+                        <ImageUploader name="cover_image_url" defaultUrl={b.cover_image_url ?? ""} folder="showcase" aspectRatio="16/9" label="Hero Background" />
+                        <p className="text-xs text-muted-foreground">Main background image for your landing page.</p>
+                    </div>
                 </div>
 
                 {/* Business Info */}
