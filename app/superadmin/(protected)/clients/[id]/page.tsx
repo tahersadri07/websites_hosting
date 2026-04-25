@@ -12,6 +12,7 @@ import {
     inviteAdminUser, removeAdminUser, setBusinessTemplate,
 } from "@/app/superadmin/actions";
 import { TEMPLATES } from "@/lib/templates";
+import { EditClientForm } from "@/components/superadmin/EditClientForm";
 
 const IconMap: Record<string, any> = {
     Layers, Image, Star, MessageSquare, Users, Package,
@@ -108,6 +109,7 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
 
                     {/* Status + View Site */}
                     <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
+                        <EditClientForm biz={biz} />
                         <a href={`/sites/${biz.slug}`} target="_blank" rel="noopener noreferrer"
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border border-[#27272A] text-zinc-400 hover:border-zinc-600 hover:text-white transition-all">
                             <ExternalLink className="w-3 h-3" /> View Site

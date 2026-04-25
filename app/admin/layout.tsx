@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
+import { getBusinessConfig } from "@/lib/business-config";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
     const supabase = await createClient();
@@ -13,9 +14,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
     const { data: business } = await (supabase as any)
         .from("businesses")
-        .select("id, name, slug, primary_color, status")
+        .select("id, name, slug, primary_color, status, business_type")
         .eq("slug", slug)
         .single();
+        
+    const config = getBusinessConfig(business?.business_type);
 
     // Fetch enabled tools for this business (gracefully if table doesn't exist yet)
     let enabledTools: string[] = [];
@@ -40,6 +43,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                 businessSlug={business?.slug ?? slug}
                 enabledTools={enabledTools}
                 primaryColor={business?.primary_color ?? "#6366F1"}
+                businessConfig={config}
             />
             <div className="flex flex-col flex-grow min-w-0">
                 <AdminTopbar userEmail={user.email} businessName={business?.name} />

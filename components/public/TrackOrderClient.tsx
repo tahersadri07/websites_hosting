@@ -9,9 +9,12 @@ import { createClient } from "@/lib/supabase/client";
 interface Props {
     businessId: string;
     currencySymbol: string;
+    template?: any;
 }
 
-export function TrackOrderClient({ businessId, currencySymbol }: Props) {
+export function TrackOrderClient({ businessId, currencySymbol, template }: Props) {
+    const colors = template?.colors || { bg: "#FFFFFF", text: "#000000", border: "#E5E7EB", primary: "#6366F1", textMuted: "#6B7280", surface: "#F9FAFB" };
+
     const [orderNumber, setOrderNumber] = useState("");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [order, setOrder] = useState<any>(null);
@@ -56,26 +59,31 @@ export function TrackOrderClient({ businessId, currencySymbol }: Props) {
     const currentStatusIndex = statuses.findIndex(s => s.id === order?.status) || 0;
 
     return (
-        <div className="max-w-2xl mx-auto py-12 px-6 min-h-[60vh]">
-            <div className="text-center mb-10">
-                <h1 className="text-3xl font-bold mb-4">Track Your Order</h1>
-                <p className="text-muted-foreground">Enter your Order Number to check the current status of your delivery.</p>
-            </div>
-
-            <form onSubmit={handleTrack} className="flex gap-3 mb-10">
-                <div className="relative flex-grow">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                    <Input 
-                        placeholder="e.g. ORD-A8F9K" 
-                        value={orderNumber}
-                        onChange={(e) => setOrderNumber(e.target.value)}
-                        className="h-14 pl-12 rounded-2xl bg-muted/50 border-transparent focus:bg-background"
-                    />
+        <div style={{ backgroundColor: colors.bg, color: colors.text }} className="pt-32 pb-24 min-h-screen">
+            <div className="max-w-2xl mx-auto px-6">
+                <div className="text-center mb-10">
+                    <h1 style={{ fontFamily: `'${template?.fonts?.heading}', serif` }} className="text-4xl font-bold mb-4 tracking-tight">Track Your Order</h1>
+                    <p style={{ color: colors.textMuted }} className="text-sm">Enter your Order Number to check the current status of your delivery.</p>
                 </div>
-                <Button type="submit" disabled={!orderNumber || loading} className="h-14 px-8 rounded-2xl bg-business-primary text-white font-bold">
-                    {loading ? "Tracking..." : "Track"}
-                </Button>
-            </form>
+
+                <form onSubmit={handleTrack} className="flex gap-3 mb-10">
+                    <div className="relative flex-grow">
+                        <Search style={{ color: colors.textMuted }} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 opacity-50" />
+                        <input 
+                            placeholder="e.g. ORD-A8F9K" 
+                            value={orderNumber}
+                            onChange={(e) => setOrderNumber(e.target.value)}
+                            style={{ background: colors.surface, borderColor: colors.border, color: colors.text, borderRadius: template?.style.heroRadius === 'rounded-none' ? '0' : '12px' }}
+                            className="w-full h-14 pl-12 border outline-none focus:opacity-80 transition-all text-sm"
+                        />
+                    </div>
+                    <button type="submit" disabled={!orderNumber || loading}
+                        style={{ backgroundColor: colors.primary, borderRadius: template?.style.heroRadius === 'rounded-none' ? '0' : '12px' }}
+                        className="h-14 px-10 text-white font-bold text-sm tracking-widest uppercase hover:opacity-90 transition-all shadow-md disabled:opacity-50"
+                    >
+                        {loading ? "Tracking..." : "Track"}
+                    </button>
+                </form>
 
             {error && (
                 <div className="p-4 rounded-xl bg-red-50 text-red-500 flex items-center gap-3">
@@ -85,34 +93,37 @@ export function TrackOrderClient({ businessId, currencySymbol }: Props) {
             )}
 
             {order && (
-                <div className="bg-muted/30 rounded-3xl p-8 border">
-                    <div className="flex justify-between items-start mb-8">
+                <div style={{ backgroundColor: colors.surface, borderColor: colors.border, borderRadius: template?.style.cardRadius === 'rounded-none' ? '0' : '24px' }} className="p-8 border shadow-sm">
+                    <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-8">
                         <div>
-                            <p className="text-sm text-muted-foreground uppercase tracking-wider font-bold mb-1">Order Summary</p>
-                            <h2 className="text-2xl font-black">{order.order_number}</h2>
-                            <p className="text-sm text-muted-foreground mt-2">
+                            <p style={{ color: colors.textMuted }} className="text-[10px] font-bold uppercase tracking-widest mb-1">Order Summary</p>
+                            <h2 style={{ color: colors.text, fontFamily: `'${template?.fonts?.heading}', serif` }} className="text-2xl font-bold">{order.order_number}</h2>
+                            <p style={{ color: colors.textMuted }} className="text-xs mt-1">
                                 Placed on {new Date(order.created_at).toLocaleDateString()}
                             </p>
                         </div>
-                        <div className="text-right">
-                            <p className="text-sm text-muted-foreground uppercase tracking-wider font-bold mb-1">Total</p>
-                            <p className="text-2xl font-black text-business-primary">{currencySymbol}{order.total_amount.toLocaleString()}</p>
+                        <div className="sm:text-right">
+                            <p style={{ color: colors.textMuted }} className="text-[10px] font-bold uppercase tracking-widest mb-1">Total Amount</p>
+                            <p style={{ color: colors.primary }} className="text-2xl font-bold">{currencySymbol}{order.total_amount.toLocaleString()}</p>
                         </div>
                     </div>
 
                     {/* Status Timeline */}
-                    <div className="py-8 relative">
+                    <div className="py-10 relative">
                         {order.status === 'cancelled' ? (
-                            <div className="text-center text-red-500 font-bold p-4 bg-red-50 rounded-xl border border-red-100">
+                            <div className="text-center text-red-500 font-bold p-6 bg-red-500/5 rounded-xl border border-red-500/20">
                                 This order has been cancelled.
                             </div>
                         ) : (
-                            <div className="flex items-center justify-between relative">
+                            <div className="flex items-center justify-between relative px-2">
                                 {/* Track Line */}
-                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-muted rounded-full" />
+                                <div style={{ backgroundColor: colors.border }} className="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-0.5" />
                                 <div 
-                                    className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-business-primary rounded-full transition-all duration-500" 
-                                    style={{ width: `${(currentStatusIndex / (statuses.length - 1)) * 100}%` }}
+                                    className="absolute left-6 top-1/2 -translate-y-1/2 h-0.5 transition-all duration-700" 
+                                    style={{ 
+                                        backgroundColor: colors.primary,
+                                        width: `calc(${(currentStatusIndex / (statuses.length - 1)) * 100}% - 48px)` 
+                                    }}
                                 />
 
                                 {statuses.map((status, idx) => {
@@ -122,12 +133,19 @@ export function TrackOrderClient({ businessId, currencySymbol }: Props) {
 
                                     return (
                                         <div key={status.id} className="relative z-10 flex flex-col items-center gap-3">
-                                            <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 ${
-                                                isActive ? "bg-business-primary text-white shadow-lg shadow-business-primary/30" : "bg-muted text-muted-foreground border-4 border-background"
-                                            } ${isCurrent ? "scale-110 ring-4 ring-business-primary/20" : ""}`}>
-                                                <Icon className="w-5 h-5" />
+                                            <div 
+                                                style={{ 
+                                                    backgroundColor: isActive ? colors.primary : colors.surface,
+                                                    borderColor: isActive ? colors.primary : colors.border,
+                                                    color: isActive ? '#FFFFFF' : colors.textMuted
+                                                }}
+                                                className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all duration-500 ${
+                                                    isCurrent ? "scale-110 shadow-lg" : ""
+                                                }`}
+                                            >
+                                                <Icon className="w-4 h-4" />
                                             </div>
-                                            <span className={`text-xs font-bold uppercase tracking-wider ${isActive ? "text-foreground" : "text-muted-foreground"}`}>
+                                            <span style={{ color: isActive ? colors.text : colors.textMuted }} className="text-[10px] font-bold uppercase tracking-wider">
                                                 {status.label}
                                             </span>
                                         </div>
@@ -137,22 +155,21 @@ export function TrackOrderClient({ businessId, currencySymbol }: Props) {
                         )}
                     </div>
 
-                    <div className="mt-8 border-t pt-8">
-                        <h3 className="font-bold mb-4">Items Ordered</h3>
-                        <div className="space-y-4">
-                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    <div style={{ borderColor: colors.border }} className="mt-8 border-t pt-8">
+                        <h3 style={{ color: colors.text }} className="font-bold text-sm uppercase tracking-widest mb-6 text-center">Items Ordered</h3>
+                        <div className="space-y-3">
                             {order.items.map((item: any, idx: number) => (
-                                <div key={idx} className="flex justify-between items-center bg-background p-4 rounded-xl border">
+                                <div key={idx} style={{ backgroundColor: colors.bg, borderColor: colors.border, borderRadius: template?.style.cardRadius === 'rounded-none' ? '0' : '12px' }} className="flex justify-between items-center p-4 border">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center text-muted-foreground">
-                                            <Package className="w-6 h-6" />
+                                        <div style={{ backgroundColor: colors.surface, color: colors.textMuted }} className="w-10 h-10 rounded flex items-center justify-center">
+                                            <Package className="w-5 h-5" />
                                         </div>
                                         <div>
-                                            <p className="font-bold text-sm">{item.title}</p>
-                                            <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                                            <p style={{ color: colors.text }} className="font-bold text-sm">{item.title}</p>
+                                            <p style={{ color: colors.textMuted }} className="text-xs">Quantity: {item.quantity}</p>
                                         </div>
                                     </div>
-                                    <p className="font-bold text-sm">{currencySymbol}{(item.price * item.quantity).toLocaleString()}</p>
+                                    <p style={{ color: colors.text }} className="font-bold text-sm">{currencySymbol}{(item.price * item.quantity).toLocaleString()}</p>
                                 </div>
                             ))}
                         </div>
@@ -160,5 +177,6 @@ export function TrackOrderClient({ businessId, currencySymbol }: Props) {
                 </div>
             )}
         </div>
+    </div>
     );
 }

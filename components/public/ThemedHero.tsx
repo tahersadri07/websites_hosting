@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { MessageCircle, Phone, ArrowRight, Star } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import type { TemplateConfig } from "@/lib/templates";
 
 interface HeroProps {
@@ -10,14 +11,15 @@ interface HeroProps {
     tagline?:      string | null;
     phone?:        string | null;
     whatsapp?:     string | null;
-    reviewCount?:  number;
     coverImageUrl?: string | null;
+    logoUrl?:      string | null;
     template:      TemplateConfig;
     siteSlug?:     string | null;
+    catalogType?:  string;
 }
 
 /* ── Shared CTA buttons ─────────────────────────────────────────────────── */
-function HeroCTAs({ whatsapp, phone, template, siteSlug }: Pick<HeroProps, "whatsapp" | "phone" | "template" | "siteSlug">) {
+function HeroCTAs({ whatsapp, phone, template, siteSlug, catalogType = "services" }: Pick<HeroProps, "whatsapp" | "phone" | "template" | "siteSlug" | "catalogType">) {
     const r = template.style.heroRadius;
     const grad = `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`;
     return (
@@ -37,10 +39,10 @@ function HeroCTAs({ whatsapp, phone, template, siteSlug }: Pick<HeroProps, "what
                     <Phone className="w-4 h-4" /> Call Now
                 </a>
             )}
-            <Link href={siteSlug ? `/sites/${siteSlug}/services` : "/services"}
+            <Link href={siteSlug ? `/sites/${siteSlug}/${catalogType}` : `/${catalogType}`}
                 style={{ color: template.colors.textMuted }}
                 className="flex items-center gap-1.5 px-3 py-3 text-sm font-medium hover:opacity-80 transition-colors">
-                View Services <ArrowRight className="w-3.5 h-3.5" />
+                View {catalogType.charAt(0).toUpperCase() + catalogType.slice(1)} <ArrowRight className="w-3.5 h-3.5" />
             </Link>
         </div>
     );
@@ -50,15 +52,15 @@ function HeroCTAs({ whatsapp, phone, template, siteSlug }: Pick<HeroProps, "what
 function RatingBadge({ count, template }: { count: number; template: TemplateConfig }) {
     if (count === 0) return null;
     return (
-        <div style={{ borderColor: template.colors.border, background: template.colors.surface + "CC", color: template.colors.textMuted }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border backdrop-blur-sm mb-6">
-            <div className="flex">
+        <div style={{ borderColor: template.colors.primary + "30", color: template.colors.textMuted, borderRadius: template.style.heroRadius === 'rounded-none' ? '0' : '99px' }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 border mb-6">
+            <div className="flex gap-0.5">
                 {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
+                    <Star key={i} style={{ color: template.colors.primary }} className="w-2.5 h-2.5 fill-current" />
                 ))}
             </div>
-            <span className="text-xs">
-                <span style={{ color: template.colors.text }} className="font-semibold">5.0</span> · {count}+ happy customers
+            <span className="text-[10px] font-bold tracking-[0.15em] uppercase opacity-80">
+                {count}+ Reviews
             </span>
         </div>
     );
@@ -95,7 +97,7 @@ function DotGrid({ color }: { color: string }) {
 ══════════════════════════════════════════════════════════════════════════════ */
 
 /** centered — dark-minimal & warm-salon */
-function HeroCentered({ businessName, tagline, whatsapp, phone, reviewCount = 0, template, siteSlug }: HeroProps) {
+function HeroCentered({ businessName, tagline, whatsapp, phone, reviewCount = 0, template, siteSlug, catalogType }: HeroProps) {
     const isDark = template.key === "dark-minimal";
     return (
         <section style={{ background: template.colors.bg }} className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
@@ -116,7 +118,7 @@ function HeroCentered({ businessName, tagline, whatsapp, phone, reviewCount = 0,
                     {tagline ?? "Quality services tailored for your needs."}
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                    <HeroCTAs whatsapp={whatsapp} phone={phone} template={template} siteSlug={siteSlug} />
+                    <HeroCTAs whatsapp={whatsapp} phone={phone} template={template} siteSlug={siteSlug} catalogType={catalogType} />
                 </div>
                 {/* Scroll hint */}
                 <div className="absolute bottom-10 left-1/2 -translate-x-1/2">
@@ -131,54 +133,110 @@ function HeroCentered({ businessName, tagline, whatsapp, phone, reviewCount = 0,
 }
 
 /** split-right — luxury-fashion: text left, decorative right */
-function HeroSplitRight({ businessName, tagline, whatsapp, phone, reviewCount = 0, template, coverImageUrl, siteSlug }: HeroProps) {
+function HeroSplitRight({ businessName, tagline, whatsapp, phone, reviewCount = 0, template, coverImageUrl, siteSlug, catalogType, logoUrl }: HeroProps) {
+    const { colors } = template;
     return (
-        <section style={{ background: template.colors.bg }} className="relative min-h-screen flex items-center overflow-hidden pt-20">
-            <div className="container mx-auto px-6 max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[80vh]">
-                {/* Left — text */}
-                <div className="relative z-10 space-y-8">
-                    <div style={{ borderColor: template.colors.primary + "40", color: template.colors.primary, background: template.colors.primary + "15" }}
-                        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-sm border text-xs font-semibold tracking-widest uppercase">
-                        ✦ Premium Collection
+        <section style={{ background: colors.bg }} className="relative min-h-screen flex items-center overflow-hidden pt-20">
+            {/* Silk Texture / Ambient Background */}
+            <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+                style={{ backgroundImage: `url("https://www.transparenttextures.com/patterns/silk.png")` }} />
+            <div 
+                style={{ background: `radial-gradient(circle at 70% 50%, ${colors.primary}18, transparent 60%)` }}
+                className="absolute inset-0 pointer-events-none" 
+            />
+            
+            <div className="container mx-auto px-6 max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-20 items-center min-h-[85vh] relative z-10">
+                {/* Left — Elegant Typography */}
+                <div className="space-y-12 animate-in fade-in slide-in-from-left-8 duration-1000">
+                    <div className="space-y-6">
+                        {logoUrl && (
+                            <div className="mb-4">
+                                <Image src={logoUrl} alt={businessName} width={120} height={120} className="object-contain" />
+                            </div>
+                        )}
+                        <div style={{ color: colors.primary }}
+                            className="inline-flex items-center gap-4 text-[10px] font-bold tracking-[0.5em] uppercase">
+                            <span style={{ background: colors.primary }} className="w-16 h-[2px]" />
+                            The 2024 Signature Series
+                        </div>
+                        
+                        <h1 style={{ color: colors.text, fontFamily: `'${template.fonts.heading}', serif`, letterSpacing: "-0.03em" }}
+                            className="text-4xl md:text-5xl lg:text-7xl font-medium leading-[0.95]">
+                            {businessName.split(' ').map((word, i) => (
+                                <span key={i} className="block first:ml-0 last:ml-12 last:italic last:font-light last:opacity-80">
+                                    {word}
+                                    {i === 0 && <span style={{ background: colors.primary }} className="inline-block w-3 h-3 rounded-full ml-4 opacity-40 animate-pulse" />}
+                                </span>
+                            ))}
+                        </h1>
                     </div>
-                    <h1 style={{ color: template.colors.text, fontFamily: `'${template.fonts.heading}', Georgia, serif`, letterSpacing: "-0.03em" }}
-                        className="text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05]">
-                        {businessName}
-                    </h1>
-                    <p style={{ color: template.colors.textMuted }} className="text-base leading-relaxed max-w-md">
-                        {tagline ?? "Timeless elegance crafted for the discerning taste."}
-                    </p>
-                    <HeroCTAs whatsapp={whatsapp} phone={phone} template={template} siteSlug={siteSlug} />
-                    {reviewCount > 0 && <RatingBadge count={reviewCount} template={template} />}
-                </div>
 
-                {/* Right — image/decoration */}
-                <div className="relative hidden lg:flex items-center justify-center">
-                    <div style={{ borderColor: template.colors.primary + "30", background: template.colors.surface }}
-                        className="relative w-[420px] h-[520px] rounded-lg border overflow-hidden">
-                        {coverImageUrl ? (
-                            <img src={coverImageUrl} alt={businessName} className="w-full h-full object-cover" />
-                        ) : (
-                            <div className="w-full h-full flex flex-col items-center justify-center gap-6">
-                                <div style={{ color: template.colors.primary + "30" }}
-                                    className="text-9xl font-bold select-none" aria-hidden>
-                                    {businessName.charAt(0)}
-                                </div>
-                                <div style={{ color: template.colors.primary, borderColor: template.colors.primary + "30" }}
-                                    className="px-5 py-2 border text-xs tracking-widest uppercase font-medium">
-                                    {template.name}
-                                </div>
+                    <p style={{ color: colors.textMuted, fontFamily: `'${template.fonts.body}', sans-serif`, borderLeftColor: colors.primary + "30" }} 
+                        className="text-lg md:text-xl leading-relaxed max-w-sm italic font-light border-l-2 pl-6">
+                        {tagline ?? "Experience the intersection of heritage craftsmanship and contemporary luxury."}
+                    </p>
+
+                    <div className="pt-4 flex flex-col sm:flex-row items-center gap-8">
+                        <HeroCTAs whatsapp={whatsapp} phone={phone} template={template} siteSlug={siteSlug} catalogType={catalogType} />
+                        {reviewCount > 0 && (
+                            <div className="hidden sm:block">
+                                <RatingBadge count={reviewCount} template={template} />
                             </div>
                         )}
                     </div>
-                    {/* Gold corner accents */}
-                    {["-top-2 -right-2", "-bottom-2 -left-2"].map((pos) => (
-                        <div key={pos} style={{ background: template.colors.primary }}
-                            className={`absolute ${pos} w-8 h-8 opacity-60`} />
-                    ))}
-                    {/* Ambient glow */}
-                    <div style={{ background: template.colors.primary + "20" }}
-                        className="absolute inset-0 rounded-full blur-[80px] scale-50" />
+                </div>
+
+                {/* Right — Layered Boutique Collage */}
+                <div className="relative h-[500px] lg:h-[700px] w-full flex items-center justify-center">
+                    {/* Decorative Background Rings */}
+                    <div style={{ borderColor: colors.primary + "15" }} className="absolute w-[130%] h-[130%] rounded-full border border-dashed animate-[spin_120s_linear_infinite]" />
+                    <div style={{ borderColor: colors.primary + "10" }} className="absolute w-[150%] h-[150%] rounded-full border" />
+                                        {/* Floating Testimonial (Top Right) */}
+                    <div 
+                        style={{ 
+                            background: colors.surface, 
+                            borderColor: colors.border,
+                            borderRadius: template.style.cardRadius
+                        }}
+                        className="absolute -top-10 -right-10 p-6 border shadow-2xl z-20 hidden xl:flex flex-col gap-3 max-w-[220px] animate-bounce-slow"
+                    >
+                        <div className="flex gap-1">
+                            {[1,2,3,4,5].map(i => (
+                                <Star key={i} style={{ color: colors.primary }} className="w-2.5 h-2.5 fill-current" />
+                            ))}
+                        </div>
+                        <p style={{ color: colors.text }} className="text-[10px] leading-relaxed italic opacity-80">
+                            "The craftsmanship is truly timeless. A masterpiece in every detail."
+                        </p>
+                        <p style={{ color: colors.textMuted }} className="text-[8px] font-bold uppercase tracking-widest">— Sophia R.</p>
+                    </div>                    {/* Main Showcase Image */}
+                    <div 
+                        style={{ 
+                            borderColor: colors.border, 
+                            background: colors.surface, 
+                            borderRadius: template.style.heroRadius 
+                        }} 
+                        className="relative w-full h-full overflow-hidden shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] border-8 z-10 group"
+                    >
+                        {coverImageUrl ? (
+                            <Image 
+                                src={coverImageUrl} 
+                                alt={businessName} 
+                                fill 
+                                className="object-cover transition-transform duration-1000 group-hover:scale-105" 
+                                priority 
+                                unoptimized 
+                            />
+                        ) : (
+                            <div style={{ background: `linear-gradient(135deg, ${colors.surface}, ${colors.bg})` }} 
+                                className="w-full h-full flex items-center justify-center p-20">
+                                <div style={{ borderColor: colors.primary + "40" }} className="w-full h-full border-2 border-dashed flex items-center justify-center">
+                                    <p className="text-[10px] uppercase tracking-[0.8em] font-bold opacity-30">The Showcase</p>
+                                </div>
+                            </div>
+                        )}
+                        <div style={{ background: colors.primary }} className="absolute bottom-0 left-0 w-[1px] h-24" />
+                    </div>
                 </div>
             </div>
         </section>
@@ -186,7 +244,7 @@ function HeroSplitRight({ businessName, tagline, whatsapp, phone, reviewCount = 
 }
 
 /** split-left — corporate-pro: big stat/badge left, text right */
-function HeroSplitLeft({ businessName, tagline, whatsapp, phone, reviewCount = 0, template, siteSlug }: HeroProps) {
+function HeroSplitLeft({ businessName, tagline, whatsapp, phone, reviewCount = 0, template, siteSlug, catalogType }: HeroProps) {
     return (
         <section style={{ background: template.colors.bg }} className="relative min-h-screen flex items-center overflow-hidden pt-20">
             {/* Background lines */}
@@ -224,7 +282,7 @@ function HeroSplitLeft({ businessName, tagline, whatsapp, phone, reviewCount = 0
                     <p style={{ color: template.colors.textMuted }} className="text-base leading-relaxed">
                         {tagline ?? "Trusted expertise delivering measurable results for your business."}
                     </p>
-                    <HeroCTAs whatsapp={whatsapp} phone={phone} template={template} siteSlug={siteSlug} />
+                    <HeroCTAs whatsapp={whatsapp} phone={phone} template={template} siteSlug={siteSlug} catalogType={catalogType} />
                 </div>
             </div>
         </section>

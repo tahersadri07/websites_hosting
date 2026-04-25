@@ -10,11 +10,12 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logout } from "@/app/(auth)/login/actions";
+import type { BusinessConfig } from "@/lib/business-config";
 
 // Core nav always shown
-const coreLinks = [
+const getCoreLinks = (config: BusinessConfig | undefined) => [
     { href: "/admin",              label: "Dashboard",    icon: LayoutDashboard, exact: true },
-    { href: "/admin/services",     label: "Products",     icon: Layers },
+    { href: "/admin/catalog",      label: config?.plural ?? "Catalog", icon: Layers },
     { href: "/admin/orders",       label: "Orders",       icon: ShoppingBag },
     { href: "/admin/categories",   label: "Categories",   icon: Package },
     { href: "/admin/gallery",      label: "Gallery",      icon: Image },
@@ -40,9 +41,10 @@ interface Props {
     businessSlug: string;
     enabledTools?: string[];
     primaryColor?: string;
+    businessConfig?: BusinessConfig;
 }
 
-function NavContent({ businessName, businessSlug, enabledTools = [], primaryColor, onClose }: Props & { onClose?: () => void }) {
+function NavContent({ businessName, businessSlug, enabledTools = [], primaryColor, businessConfig, onClose }: Props & { onClose?: () => void }) {
     const pathname = usePathname();
     const isActive = (href: string, exact?: boolean) =>
         exact ? pathname === href : pathname.startsWith(href);
@@ -76,8 +78,8 @@ function NavContent({ businessName, businessSlug, enabledTools = [], primaryColo
             </div>
 
             {/* Navigation */}
-            <nav className="flex-grow px-3 py-3 space-y-0.5 overflow-y-auto">
-                {coreLinks.map(link => {
+            <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+                {getCoreLinks(businessConfig).map((link) => {
                     const active = isActive(link.href, link.exact);
                     return (
                         <Link key={link.href} href={link.href} onClick={onClose}
@@ -132,14 +134,14 @@ function NavContent({ businessName, businessSlug, enabledTools = [], primaryColo
     );
 }
 
-export function AdminSidebar({ businessName, businessSlug, enabledTools, primaryColor }: Props) {
-    const [mobileOpen, setMobileOpen] = useState(false);
+export function AdminSidebar(props: Props) {
+    const [isOpen, setIsOpen] = useState(false);
 
     return (
         <>
             {/* Mobile toggle */}
             <button
-                onClick={() => setMobileOpen(true)}
+                onClick={() => setIsOpen(true)}
                 className="lg:hidden fixed top-4 left-4 z-50 w-9 h-9 bg-[#13131A] border border-[#27272A] rounded-xl flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
                 aria-label="Open menu"
             >
@@ -149,30 +151,19 @@ export function AdminSidebar({ businessName, businessSlug, enabledTools, primary
             {/* Desktop sidebar */}
             <aside className="hidden lg:block w-[220px] min-h-screen shrink-0 border-r border-[#27272A]">
                 <div className="sticky top-0 h-screen overflow-y-auto">
-                    <NavContent
-                        businessName={businessName}
-                        businessSlug={businessSlug}
-                        enabledTools={enabledTools}
-                        primaryColor={primaryColor}
-                    />
+                    <NavContent {...props} />
                 </div>
             </aside>
 
             {/* Mobile drawer */}
-            {mobileOpen && (
+            {isOpen && (
                 <>
                     <div
                         className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
-                        onClick={() => setMobileOpen(false)}
+                        onClick={() => setIsOpen(false)}
                     />
                     <aside className="fixed inset-y-0 left-0 z-50 w-64 lg:hidden shadow-2xl">
-                        <NavContent
-                            businessName={businessName}
-                            businessSlug={businessSlug}
-                            enabledTools={enabledTools}
-                            primaryColor={primaryColor}
-                            onClose={() => setMobileOpen(false)}
-                        />
+                        <NavContent {...props} onClose={() => setIsOpen(false)} />
                     </aside>
                 </>
             )}

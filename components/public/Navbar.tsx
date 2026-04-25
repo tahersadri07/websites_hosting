@@ -1,6 +1,7 @@
 "use client";
 
 import type { TemplateConfig } from "@/lib/templates";
+import type { BusinessConfig } from "@/lib/business-config";
 
 
 import { useState, useEffect } from "react";
@@ -27,9 +28,10 @@ interface NavbarProps {
     siteSlug?: string | null;
     template?: TemplateConfig | null;
     categories?: Category[];
+    businessConfig?: BusinessConfig;
 }
 
-export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, siteSlug, template, categories = [] }: NavbarProps) {
+export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, siteSlug, template, categories = [], businessConfig }: NavbarProps) {
     const { itemCount, wishlistCount, setIsDrawerOpen, setActiveTab } = useCart();
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
@@ -37,6 +39,8 @@ export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, s
     const t = useTranslations("nav");
     const pathname = usePathname();
     const router = useRouter();
+    const colors = template?.colors || { bg: "#0A0A0F", border: "#27272A", text: "#FAFAFA", textMuted: "#A1A1AA", primary: "#6366F1", surface: "#13131A" };
+
 
     useEffect(() => {
         const handler = () => setScrolled(window.scrollY > 20);
@@ -49,8 +53,8 @@ export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, s
         { href: `${base}/`,         label: t("home") },
         { href: `${base}/about`,    label: t("about") },
         { 
-            href: `${base}/services`, 
-            label: servicesLabel || t("services"),
+            href: `${base}/${businessConfig?.urlPath ?? 'services'}`, 
+            label: servicesLabel || (template?.key === 'influencer-vibe' ? 'Creators' : businessConfig?.plural) || t("services"),
             hasDropdown: categories.length > 0,
             categories: categories
         },
@@ -65,12 +69,17 @@ export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, s
     };
 
     return (
-        <header className={cn(
-            "fixed top-0 z-50 w-full transition-all duration-300",
-            scrolled
-                ? "bg-[#0A0A0F]/80 backdrop-blur-xl border-b border-[#27272A] py-3"
-                : "bg-transparent py-5"
-        )}>
+        <header 
+            style={{ 
+                backgroundColor: scrolled ? `${colors.bg}${template?.style.navStyle === 'glass' ? 'CC' : ''}` : 'transparent',
+                borderBottomColor: scrolled ? colors.border : 'transparent'
+            }}
+            className={cn(
+                "fixed top-0 z-50 w-full transition-all duration-300 border-b",
+                template?.style.navStyle === 'glass' && "backdrop-blur-xl",
+                scrolled ? "py-3 shadow-lg" : "py-5 border-transparent"
+            )}
+        >
             <div className="container mx-auto px-6 flex items-center justify-between max-w-7xl">
                 {/* Logo */}
                 <Link href={base || "/"} className="flex items-center gap-2.5">
@@ -78,7 +87,7 @@ export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, s
                         <Image src={logoUrl} alt={businessName} width={140} height={40}
                             className="h-9 w-auto object-contain" unoptimized />
                     ) : (
-                        <span className="text-lg font-bold text-white tracking-tight">
+                        <span style={{ color: colors.text }} className="text-lg font-bold tracking-tight">
                             {businessName}
                         </span>
                     )}
@@ -94,12 +103,12 @@ export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, s
                             onMouseLeave={() => link.hasDropdown && setShowServicesDropdown(false)}
                         >
                             <Link href={link.href}
-                                className={cn(
-                                    "px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1",
-                                    pathname === link.href
-                                        ? "text-white bg-white/8"
-                                        : "text-zinc-400 hover:text-white hover:bg-white/5"
-                                )}>
+                                style={{ 
+                                    color: pathname === link.href ? colors.text : colors.textMuted,
+                                    backgroundColor: pathname === link.href ? `${colors.primary}15` : 'transparent'
+                                }}
+                                className="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1 hover:opacity-80"
+                            >
                                 {link.label}
                                 {link.hasDropdown && (
                                     <svg className={cn("w-3.5 h-3.5 transition-transform duration-200", showServicesDropdown && "rotate-180")} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -110,22 +119,31 @@ export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, s
 
                             {/* Dropdown menu */}
                             {link.hasDropdown && (
-                                <div className={cn(
-                                    "absolute top-full left-0 mt-1 w-56 rounded-xl bg-[#13131A] border border-[#27272A] shadow-2xl p-2 transition-all duration-200 origin-top-left z-50",
-                                    showServicesDropdown ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
-                                )}>
+                                <div 
+                                    style={{ 
+                                        backgroundColor: colors.surface, 
+                                        borderColor: colors.border,
+                                        borderRadius: template?.style.heroRadius === 'rounded-none' ? '0' : '12px'
+                                    }}
+                                    className={cn(
+                                        "absolute top-full left-0 mt-1 w-56 border shadow-2xl p-2 transition-all duration-200 origin-top-left z-50",
+                                        showServicesDropdown ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
+                                    )}
+                                >
                                     <Link 
                                         href={link.href} 
-                                        className="block px-3 py-2 rounded-lg text-xs font-semibold text-zinc-500 hover:text-white hover:bg-white/5 mb-1"
+                                        style={{ color: colors.textMuted }}
+                                        className="block px-3 py-2 text-[10px] font-bold uppercase tracking-wider hover:opacity-80 transition-all mb-1"
                                     >
                                         View All
                                     </Link>
-                                    <div className="h-px bg-[#27272A] mx-2 mb-1" />
+                                    <div style={{ backgroundColor: colors.border }} className="h-px mx-2 mb-1" />
                                     {link.categories?.map(cat => (
                                         <Link 
                                             key={cat.id} 
                                             href={`${link.href}?category=${cat.id}`}
-                                            className="block px-3 py-2 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5"
+                                            style={{ color: colors.text }}
+                                            className="block px-3 py-2 text-sm font-medium hover:opacity-70 transition-colors"
                                         >
                                             {cat.name}
                                         </Link>
@@ -141,24 +159,26 @@ export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, s
                     <div className="flex items-center gap-1.5 mr-2">
                         <button 
                             onClick={() => { setActiveTab("wishlist"); setIsDrawerOpen(true); }}
-                            className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 relative group transition-all"
+                            style={{ color: colors.textMuted }}
+                            className="p-2 rounded-xl hover:bg-black/5 relative group transition-all"
                             title="Wishlist"
                         >
                             <Heart className="w-5 h-5" />
                             {wishlistCount > 0 && (
-                                <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-[#0A0A0F]">
+                                <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white">
                                     {wishlistCount}
                                 </span>
                             )}
                         </button>
                         <button 
                             onClick={() => { setActiveTab("cart"); setIsDrawerOpen(true); }}
-                            className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 relative group transition-all"
+                            style={{ color: colors.textMuted }}
+                            className="p-2 rounded-xl hover:bg-black/5 relative group transition-all"
                             title="Cart"
                         >
                             <ShoppingCart className="w-5 h-5" />
                             {itemCount > 0 && (
-                                <span className="absolute top-1 right-1 w-4 h-4 bg-business-primary text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-[#0A0A0F]">
+                                <span style={{ backgroundColor: colors.primary }} className="absolute top-1 right-1 w-4 h-4 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white">
                                     {itemCount}
                                 </span>
                             )}
@@ -166,7 +186,8 @@ export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, s
                     </div>
                     {whatsappNumber && (
                         <button onClick={handleWhatsApp}
-                            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-indigo-500/25">
+                            style={{ backgroundColor: colors.primary, borderRadius: template?.style.heroRadius === 'rounded-none' ? '0' : '8px' }}
+                            className="flex items-center gap-2 px-4 py-2 text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg">
                             <MessageCircle className="w-4 h-4" />
                             {t("bookNow")}
                         </button>
@@ -174,40 +195,45 @@ export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, s
                 </div>
 
                 {/* Mobile toggle */}
-                <button onClick={() => setIsOpen(!isOpen)} className="md:hidden text-zinc-400 hover:text-white transition-colors" aria-label="Menu">
+                <button onClick={() => setIsOpen(!isOpen)} style={{ color: colors.textMuted }} className="md:hidden transition-colors" aria-label="Menu">
                     {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                 </button>
             </div>
 
             {/* Mobile drawer */}
-            <div className={cn(
-                "fixed inset-0 top-[56px] z-40 bg-[#0A0A0F]/95 backdrop-blur-xl md:hidden transition-transform duration-300 overflow-y-auto",
-                isOpen ? "translate-x-0" : "translate-x-full"
-            )}>
+            <div 
+                style={{ backgroundColor: colors.surface }}
+                className={cn(
+                    "fixed inset-0 top-[56px] z-40 md:hidden transition-transform duration-300 overflow-y-auto",
+                    isOpen ? "translate-x-0" : "translate-x-full"
+                )}
+            >
                 <nav className="flex flex-col gap-1 p-6 pt-8">
                     {navLinks.map(link => (
                         <div key={link.href} className="flex flex-col gap-1">
                             <Link href={link.href} onClick={() => !link.hasDropdown && setIsOpen(false)}
-                                className={cn(
-                                    "px-4 py-3 rounded-xl text-base font-medium transition-all flex items-center justify-between",
-                                    pathname === link.href
-                                        ? "text-white bg-white/8"
-                                        : "text-zinc-400 hover:text-white hover:bg-white/5"
-                                )}>
+                                style={{ 
+                                    color: pathname === link.href ? colors.text : colors.textMuted,
+                                    backgroundColor: pathname === link.href ? `${colors.primary}10` : 'transparent',
+                                    borderRadius: template?.style.heroRadius === 'rounded-none' ? '0' : '12px'
+                                }}
+                                className="px-4 py-3 text-base font-medium transition-all flex items-center justify-between"
+                            >
                                 {link.label}
                                 {link.hasDropdown && (
-                                    <svg className="w-4 h-4 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg className="w-4 h-4 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                     </svg>
                                 )}
                             </Link>
                             
                             {link.hasDropdown && (
-                                <div className="pl-4 flex flex-col gap-1 mt-1 border-l border-[#27272A] ml-4">
+                                <div style={{ borderColor: colors.border }} className="pl-4 flex flex-col gap-1 mt-1 border-l ml-4">
                                     <Link 
                                         href={link.href} 
                                         onClick={() => setIsOpen(false)}
-                                        className="px-4 py-2 rounded-lg text-sm text-zinc-500 hover:text-white"
+                                        style={{ color: colors.textMuted }}
+                                        className="px-4 py-2 rounded-lg text-sm"
                                     >
                                         All {link.label}
                                     </Link>
@@ -216,7 +242,8 @@ export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, s
                                             key={cat.id} 
                                             href={`${link.href}?category=${cat.id}`}
                                             onClick={() => setIsOpen(false)}
-                                            className="px-4 py-2 rounded-lg text-sm text-zinc-400 hover:text-white"
+                                            style={{ color: colors.textMuted }}
+                                            className="px-4 py-2 rounded-lg text-sm"
                                         >
                                             {cat.name}
                                         </Link>
@@ -225,10 +252,12 @@ export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, s
                             )}
                         </div>
                     ))}
-                    <div className="border-t border-[#27272A] mt-4 pt-4 space-y-2">
+                    <div style={{ borderColor: colors.border }} className="border-t mt-4 pt-4 space-y-2">
                         {whatsappNumber && (
                             <button onClick={() => { handleWhatsApp(); setIsOpen(false); }}
-                                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-semibold">
+                                style={{ backgroundColor: colors.primary }}
+                                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-white text-sm font-semibold"
+                            >
                                 <MessageCircle className="w-4 h-4" />
                                 {t("bookNow")}
                             </button>

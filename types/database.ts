@@ -74,6 +74,7 @@ export interface BusinessRow {
     logo_url: string | null;
     address: string | null;
     phone: string | null;
+    business_type: "product" | "service";
     whatsapp: string | null;
     email: string | null;
     google_maps_url: string | null;
@@ -86,7 +87,6 @@ export interface BusinessRow {
     // ── Platform fields ──────────────────────────────────────────────────────
     status: "active" | "paused" | "maintenance" | null;
     status_message: string | null;
-    business_type: string | null;
     services_label: string | null;
     currency_symbol: string | null;
     custom_domain: string | null;
@@ -114,7 +114,7 @@ export interface BusinessInsert {
     youtube_url?: string | null;
     status?: "active" | "paused" | "maintenance" | null;
     status_message?: string | null;
-    business_type?: string | null;
+    business_type?: "product" | "service";
     services_label?: string | null;
     currency_symbol?: string | null;
     custom_domain?: string | null;

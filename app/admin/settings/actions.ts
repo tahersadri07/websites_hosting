@@ -17,6 +17,7 @@ export async function updateSettings(formData: FormData) {
         address: formData.get("address") || null,
         google_maps_url: formData.get("google_maps_url") || null,
         logo_url: formData.get("logo_url") || null,
+        cover_image_url: formData.get("cover_image_url") || null,
         primary_color: formData.get("primary_color") || null,
         secondary_color: formData.get("secondary_color") || null,
         instagram_url: formData.get("instagram_url") || null,

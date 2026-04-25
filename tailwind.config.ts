@@ -63,10 +63,20 @@ const config: Config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "bounce-slow": {
+          "0%, 100%": { transform: "translateY(-5%) rotate(6deg)", animationTimingFunction: "cubic-bezier(0.8, 0, 1, 1)" },
+          "50%": { transform: "translateY(0) rotate(6deg)", animationTimingFunction: "cubic-bezier(0, 0, 0.2, 1)" }
+        },
+        "pulse-subtle": {
+          "0%, 100%": { opacity: "1", transform: "scale(1)" },
+          "50%": { opacity: "0.8", transform: "scale(0.98)" }
+        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "bounce-slow": "bounce-slow 4s infinite",
+        "pulse-subtle": "pulse-subtle 3s infinite"
       },
       screens: {
         xs: "360px", // Minimum supported width for Indian market (budget phones)

@@ -7,9 +7,12 @@ import { Button } from "@/components/ui/button";
 interface FloatingWhatsAppProps {
     phone: string;
     message?: string;
+    template?: any;
 }
 
-export function FloatingWhatsApp({ phone, message = "Hello! I'd like to inquire about your services." }: FloatingWhatsAppProps) {
+export function FloatingWhatsApp({ phone, message = "Hello! I'd like to inquire about your services.", template }: FloatingWhatsAppProps) {
+    const colors = template?.colors || { text: "#000000" };
+
     const handleClick = () => {
         const url = `https://wa.me/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`;
         window.open(url, "_blank");
@@ -24,7 +27,7 @@ export function FloatingWhatsApp({ phone, message = "Hello! I'd like to inquire 
                 whileTap={{ scale: 0.9 }}
                 className="relative group"
             >
-                <div className="absolute -top-12 right-0 bg-white text-black text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border">
+                <div style={{ color: colors.text }} className="absolute -top-12 right-0 bg-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border">
                     Chat with us!
                     <div className="absolute top-full right-4 border-l-8 border-r-8 border-t-8 border-transparent border-t-white" />
                 </div>
