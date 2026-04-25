@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { businessId, items, details, totalAmount } = body;
+        const { businessId, items, details, totalAmount, paymentMethod, transactionId } = body;
 
         if (!businessId || !items || !details) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -26,6 +26,8 @@ export async function POST(request: Request) {
                 total_amount: totalAmount,
                 items: items,
                 customer_details: details,
+                payment_method: paymentMethod || 'cash',
+                transaction_id: transactionId || null,
             });
 
         if (error) throw error;

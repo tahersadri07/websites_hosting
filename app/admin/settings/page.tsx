@@ -19,8 +19,10 @@ const BUSINESS_TYPES = [
 export default async function SettingsPage() {
     const slug = await getAdminBusinessSlug();
     const supabase = await createClient();
-    const { data: b } = await (supabase as any).from("businesses").select("*").eq("slug", slug).single();
+    const { data: b } = await (supabase as any).from("businesses").select("*, business_tools(tool_key, is_enabled)").eq("slug", slug).single();
     if (!b) return <p>Business not found.</p>;
+
+    const onlinePaymentsEnabled = b.business_tools?.some((t: any) => t.tool_key === 'online_payments' && t.is_enabled) ?? false;
 
     return (
         <div className="max-w-2xl space-y-6">
@@ -60,6 +62,31 @@ export default async function SettingsPage() {
                             <Input id="whatsapp" name="whatsapp" defaultValue={b.whatsapp ?? ""} className="h-11 rounded-xl" />
                         </div>
                     </div>
+                    {onlinePaymentsEnabled && (
+                        <>
+                            <div className="space-y-2">
+                                <Label htmlFor="upi_id">UPI ID (for payments)</Label>
+                                <Input id="upi_id" name="upi_id" defaultValue={(b as any).upi_id ?? ""} placeholder="e.g. yourname@okicici" className="h-11 rounded-xl" />
+                            </div>
+
+                            {/* Payment Gateways */}
+                            <div className="bg-muted/30 p-5 rounded-2xl border border-border mt-6 space-y-4">
+                                <h4 className="font-bold text-sm mb-2">Automated Payment Gateway (Razorpay)</h4>
+                                <p className="text-xs text-muted-foreground mb-4">Enter your Razorpay API keys to automatically accept and verify GPay, PhonePe, Cards, and more.</p>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="razorpay_key_id">Razorpay Key ID</Label>
+                                        <Input id="razorpay_key_id" name="razorpay_key_id" defaultValue={(b as any).razorpay_key_id ?? ""} placeholder="rzp_test_..." className="h-11 rounded-xl bg-background" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="razorpay_key_secret">Razorpay Key Secret</Label>
+                                        <Input id="razorpay_key_secret" name="razorpay_key_secret" type="password" defaultValue={(b as any).razorpay_key_secret ?? ""} placeholder="Secret key..." className="h-11 rounded-xl bg-background" />
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    )}
                     <div className="space-y-2">
                         <Label htmlFor="email">Email</Label>
                         <Input id="email" name="email" type="email" defaultValue={b.email ?? ""} className="h-11 rounded-xl" />

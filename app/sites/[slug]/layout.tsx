@@ -49,7 +49,7 @@ export default async function SiteLayout({ children, params }: Props) {
     const db = createServiceClient();
 
     const [{ data: business, error }, { data: categories }] = await Promise.all([
-        db.from("businesses").select("*").eq("slug", slug).single(),
+        db.from("businesses").select("*, business_tools(tool_key, is_enabled)").eq("slug", slug).single(),
         db.from("categories").select("id, name, slug").eq("business_id", (await db.from("businesses").select("id").eq("slug", slug).single()).data?.id).order("sort_order")
     ]);
 
@@ -81,6 +81,8 @@ export default async function SiteLayout({ children, params }: Props) {
         instagram: business.instagram_url ?? null,
         youtube:   business.youtube_url   ?? null,
     };
+
+    const onlinePaymentsEnabled = (business as any).business_tools?.some((t: any) => t.tool_key === 'online_payments' && t.is_enabled) ?? false;
 
     return (
         <NextIntlClientProvider locale={locale} messages={messages}>
@@ -118,6 +120,8 @@ export default async function SiteLayout({ children, params }: Props) {
                             businessName={business.name} 
                             whatsappNumber={business.whatsapp}
                             currencySymbol={(business as any).currency_symbol ?? "₹"}
+                            upiId={(business as any).upi_id ?? null}
+                            onlinePaymentsEnabled={onlinePaymentsEnabled}
                         />
                     </div>
                 </ThemeProvider>

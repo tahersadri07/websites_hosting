@@ -31,7 +31,10 @@ async function getBusinessData() {
         const { createClient } = await import("@/lib/supabase/server");
         const supabase = await createClient();
         const { data: business, error } = await (supabase as any)
-            .from("businesses").select("*").eq("slug", slug).single();
+            .from("businesses")
+            .select("*, business_tools(tool_key, is_enabled)")
+            .eq("slug", slug)
+            .single();
 
         if (error || !business) return { business: FALLBACK_BUSINESS, connected: false };
         return { business, connected: true };
@@ -95,6 +98,8 @@ export default async function PublicLayout({ children }: { children: React.React
         youtube:   (business as any).youtube_url   ?? null,
     };
 
+    const onlinePaymentsEnabled = business.business_tools?.some((t: any) => t.tool_key === 'online_payments' && t.is_enabled) ?? false;
+
     return (
         <NextIntlClientProvider locale={locale} messages={messages}>
             <CartProvider>
@@ -118,6 +123,8 @@ export default async function PublicLayout({ children }: { children: React.React
                         businessName={business.name} 
                         whatsappNumber={business.whatsapp}
                         currencySymbol={(business as any).currency_symbol ?? "₹"}
+                        upiId={(business as any).upi_id ?? null}
+                        onlinePaymentsEnabled={onlinePaymentsEnabled}
                     />
                 </div>
             </CartProvider>

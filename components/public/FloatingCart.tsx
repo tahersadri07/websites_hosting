@@ -17,15 +17,18 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import Script from "next/script";
 
 interface Props {
     businessId?: string;
     businessName: string;
     whatsappNumber: string | null;
     currencySymbol: string;
+    upiId?: string | null;
+    onlinePaymentsEnabled?: boolean;
 }
 
-export function FloatingCart({ businessId, businessName, whatsappNumber, currencySymbol }: Props) {
+export function FloatingCart({ businessId, businessName, whatsappNumber, currencySymbol, upiId, onlinePaymentsEnabled = true }: Props) {
     const { 
         items, wishlist, itemCount, wishlistCount, totalPrice, 
         updateQuantity, removeFromCart, clearCart, 
@@ -33,14 +36,97 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
         isDrawerOpen, setIsDrawerOpen, activeTab, setActiveTab
     } = useCart();
     
-    const [step, setStep] = useState<"review" | "details">("review");
+    const [step, setStep] = useState<"review" | "details" | "payment">("review");
     const [details, setDetails] = useState({ name: "", phone: "", address: "" });
+    const [paymentMethod, setPaymentMethod] = useState<"cash" | "manual_upi" | "razorpay">("cash");
+    const [transactionId, setTransactionId] = useState("");
     const [loading, setLoading] = useState(false);
 
     // Reset step when tab changes or drawer closes
     useEffect(() => {
         if (!isDrawerOpen) setStep("review");
     }, [isDrawerOpen, activeTab]);
+
+    const handleRazorpayCheckout = async () => {
+        if (!businessId) return;
+        setLoading(true);
+
+        try {
+            // 1. Create Razorpay Order
+            const res = await fetch("/api/payments/create-order", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ businessId, amount: totalPrice, currency: "INR" })
+            });
+            const data = await res.json();
+            
+            if (!res.ok) throw new Error(data.error || "Failed to create order");
+
+            // 2. Initialize Razorpay options
+            const options = {
+                key: data.keyId,
+                amount: data.amount,
+                currency: data.currency,
+                name: businessName,
+                description: "Order Payment",
+                order_id: data.orderId,
+                handler: async function (response: any) {
+                    try {
+                        // 3. Verify Payment and Create DB Order
+                        const verifyRes = await fetch("/api/payments/verify", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                businessId,
+                                items,
+                                details,
+                                totalAmount: totalPrice,
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                            })
+                        });
+                        const verifyData = await verifyRes.json();
+                        if (verifyRes.ok) {
+                            alert("Payment Successful! Order Number: " + verifyData.orderNumber);
+                            
+                            // Optional: Send WhatsApp confirmation
+                            const itemsList = items.map(i => `- ${i.title} (x${i.quantity})`).join("\n");
+                            const message = `*Paid Order via Razorpay*\nOrder: ${verifyData.orderNumber}\n\n*Items:*\n${itemsList}\n\n*Amount Paid:* ${currencySymbol}${totalPrice}\n\n*Customer:*\n${details.name}\n${details.phone}\n${details.address}`;
+                            if (whatsappNumber) {
+                                window.open(`https://wa.me/${whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`, "_blank");
+                            }
+
+                            clearCart();
+                            setIsDrawerOpen(false);
+                        } else {
+                            alert("Payment verification failed. Please contact support.");
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        alert("An error occurred during verification.");
+                    }
+                },
+                prefill: {
+                    name: details.name,
+                    contact: details.phone,
+                },
+                theme: { color: "#7c3aed" } // Using primary color theme
+            };
+
+            const rzp = new (window as any).Razorpay(options);
+            rzp.on('payment.failed', function (response: any) {
+                alert("Payment Failed: " + response.error.description);
+            });
+            rzp.open();
+
+        } catch (err: any) {
+            console.error(err);
+            alert(err.message || "Something went wrong.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleCheckout = async () => {
         if (!whatsappNumber) return;
@@ -56,7 +142,9 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
                     businessId,
                     items,
                     details,
-                    totalAmount: totalPrice
+                    totalAmount: totalPrice,
+                    paymentMethod,
+                    transactionId
                 })
             });
             const data = await res.json();
@@ -79,6 +167,9 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
             `Phone: ${details.phone}`,
             `Address: ${details.address}`,
             ``,
+            `💳 *Payment Method:* ${paymentMethod === 'manual_upi' ? 'Manual UPI/GPay' : paymentMethod === 'razorpay' ? 'Paid Online' : 'Cash / Pay Later'}`,
+            transactionId ? `*Transaction ID:* ${transactionId}` : ``,
+            ``,
             `Please confirm my order. Thank you!`,
         ].filter(Boolean).join("\n");
 
@@ -91,6 +182,8 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
 
     return (
         <>
+            <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
+            
             {/* Floating Toggle (Visible when items > 0) */}
             {(itemCount > 0 || wishlistCount > 0) && !isDrawerOpen && (
                 <button 
@@ -146,7 +239,11 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
                             </button>
                         </div>
                         <SheetTitle className="text-white text-xl">
-                            {activeTab === "cart" ? (step === "review" ? "Shopping Cart" : "Checkout Details") : "Your Wishlist"}
+                            {activeTab === "cart" ? (
+                                step === "review" ? "Shopping Cart" : 
+                                step === "details" ? "Checkout Details" : 
+                                "Payment"
+                            ) : "Your Wishlist"}
                         </SheetTitle>
                     </SheetHeader>
 
@@ -190,7 +287,7 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
                                         ))}
                                     </div>
                                 )
-                            ) : (
+                            ) : step === "details" ? (
                                 <div className="space-y-5">
                                     <div className="space-y-2">
                                         <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Full Name</Label>
@@ -204,6 +301,107 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
                                         <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Delivery Address</Label>
                                         <Input value={details.address} onChange={(e) => setDetails({...details, address: e.target.value})} placeholder="Address" className="h-12 rounded-xl" />
                                     </div>
+                                </div>
+                            ) : (
+                                <div className="space-y-6">
+                                    <div className="bg-muted/50 p-4 rounded-2xl border border-border">
+                                        <h4 className="font-bold mb-4">Select Payment Method</h4>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <button 
+                                                onClick={() => setPaymentMethod("cash")}
+                                                className={cn(
+                                                    "p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 text-center",
+                                                    paymentMethod === "cash" ? "border-business-primary bg-business-primary/5 text-business-primary" : "border-transparent bg-background text-zinc-500 hover:bg-muted"
+                                                )}
+                                            >
+                                                <span className="font-bold text-sm">Pay Later</span>
+                                                <span className="text-[10px]">Cash or Transfer later</span>
+                                            </button>
+                                            
+                                            {upiId ? (
+                                                <button 
+                                                    onClick={() => setPaymentMethod("manual_upi")}
+                                                    className={cn(
+                                                        "p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 text-center",
+                                                        paymentMethod === "manual_upi" ? "border-business-primary bg-business-primary/5 text-business-primary" : "border-transparent bg-background text-zinc-500 hover:bg-muted"
+                                                    )}
+                                                >
+                                                    <span className="font-bold text-sm">Manual UPI</span>
+                                                    <span className="text-[10px]">Scan & enter UTR</span>
+                                                </button>
+                                            ) : null}
+                                            
+                                            {onlinePaymentsEnabled ? (
+                                                <button 
+                                                    onClick={() => setPaymentMethod("razorpay")}
+                                                    className={cn(
+                                                        "p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 text-center",
+                                                        paymentMethod === "razorpay" ? "border-business-primary bg-business-primary/5 text-business-primary" : "border-transparent bg-background text-zinc-500 hover:bg-muted"
+                                                    )}
+                                                >
+                                                    <span className="font-bold text-sm">Pay Online</span>
+                                                    <span className="text-[10px]">Cards, UPI, Wallets</span>
+                                                </button>
+                                            ) : (
+                                                <div className="p-4 rounded-xl border-2 border-transparent bg-background opacity-50 flex flex-col items-center gap-2 text-center cursor-not-allowed">
+                                                    <span className="font-bold text-sm text-zinc-500">Pay Online</span>
+                                                    <span className="text-[10px] text-zinc-500">Not enabled</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {paymentMethod === "manual_upi" && upiId && (
+                                        <div className="space-y-4 animate-in fade-in slide-in-from-top-4">
+                                            <div className="p-5 rounded-2xl bg-[#0A0A0F] border border-[#27272A] text-center flex flex-col items-center">
+                                                <p className="text-sm text-zinc-400 mb-4">Pay directly via your UPI app (GPay, PhonePe, Paytm)</p>
+                                                
+                                                {/* Dynamic QR Code */}
+                                                <div className="bg-white p-2 rounded-xl mb-4 w-40 h-40">
+                                                    <img 
+                                                        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`upi://pay?pa=${upiId}&pn=${encodeURIComponent(businessName)}&am=${totalPrice}&cu=INR`)}`}
+                                                        alt="UPI QR Code"
+                                                        className="w-full h-full object-contain"
+                                                    />
+                                                </div>
+
+                                                <a 
+                                                    href={`upi://pay?pa=${upiId}&pn=${encodeURIComponent(businessName)}&am=${totalPrice}&cu=INR`}
+                                                    className="inline-flex items-center justify-center w-full h-12 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold shadow-lg shadow-blue-500/20 mb-2"
+                                                >
+                                                    Click to Pay {currencySymbol}{totalPrice}
+                                                </a>
+                                                <p className="text-[10px] text-zinc-500">Scan QR or use UPI ID manually:<br/><strong className="text-zinc-300">{upiId}</strong></p>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Transaction ID (Required)</Label>
+                                                <Input 
+                                                    value={transactionId} 
+                                                    onChange={(e) => setTransactionId(e.target.value)} 
+                                                    placeholder="Enter 12-digit UTR / Ref No." 
+                                                    className="h-12 rounded-xl bg-background border-border" 
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {paymentMethod === "razorpay" && (
+                                        <div className="space-y-4 animate-in fade-in slide-in-from-top-4">
+                                            <div className="p-5 rounded-2xl bg-[#0A0A0F] border border-[#27272A] text-center flex flex-col items-center">
+                                                <p className="text-sm text-zinc-400 mb-4">Pay securely with Credit/Debit Card, UPI, Netbanking, or Wallets.</p>
+                                                
+                                                <Button 
+                                                    onClick={handleRazorpayCheckout}
+                                                    disabled={loading}
+                                                    className="inline-flex items-center justify-center w-full h-12 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold shadow-lg shadow-indigo-500/20 mb-2"
+                                                >
+                                                    {loading ? "Processing..." : `Pay ${currencySymbol}${totalPrice} Now`}
+                                                </Button>
+                                                <p className="text-[10px] text-zinc-500">Secured by Razorpay</p>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )
                         ) : (
@@ -264,17 +462,52 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
                                     <Button onClick={() => setStep("details")} className="w-full py-7 rounded-2xl text-base font-bold bg-zinc-900 hover:bg-zinc-800 shadow-xl">
                                         Proceed to Checkout
                                     </Button>
-                                ) : (
+                                ) : step === "details" ? (
                                     <div className="flex gap-3">
                                         <Button variant="outline" onClick={() => setStep("review")} className="h-14 rounded-2xl px-6">Back</Button>
                                         <Button 
-                                            disabled={!details.name || !details.phone || !details.address || loading}
-                                            onClick={handleCheckout}
-                                            className="flex-grow h-14 rounded-2xl text-base font-bold bg-[#25D366] hover:bg-[#20bd5c] text-white shadow-lg shadow-[#25D366]/20"
+                                            disabled={!details.name || !details.phone || !details.address}
+                                            onClick={() => setStep("payment")}
+                                            className="flex-grow h-14 rounded-2xl text-base font-bold bg-business-primary hover:bg-business-primary/90 text-white"
                                         >
-                                            <Send className="w-5 h-5 mr-2" />
-                                            {loading ? "Ordering..." : "Confirm via WhatsApp"}
+                                            Continue to Payment
                                         </Button>
+                                    </div>
+                                ) : (
+                                    <div className="flex gap-3">
+                                        <Button variant="outline" onClick={() => setStep("details")} className="h-14 rounded-2xl px-6">Back</Button>
+                                        
+                                        {paymentMethod === "cash" && (
+                                            <Button 
+                                                disabled={loading}
+                                                onClick={handleCheckout}
+                                                className="flex-grow h-14 rounded-2xl text-base font-bold bg-[#25D366] hover:bg-[#20bd5c] text-white shadow-lg shadow-[#25D366]/20"
+                                            >
+                                                <Send className="w-5 h-5 mr-2" />
+                                                {loading ? "Ordering..." : "Confirm Pay Later"}
+                                            </Button>
+                                        )}
+                                        
+                                        {paymentMethod === "manual_upi" && (
+                                            <Button 
+                                                disabled={loading || transactionId.trim().length < 4}
+                                                onClick={handleCheckout}
+                                                className="flex-grow h-14 rounded-2xl text-base font-bold bg-[#25D366] hover:bg-[#20bd5c] text-white shadow-lg shadow-[#25D366]/20"
+                                            >
+                                                <Send className="w-5 h-5 mr-2" />
+                                                {loading ? "Ordering..." : "Confirm via WhatsApp"}
+                                            </Button>
+                                        )}
+                                        
+                                        {paymentMethod === "razorpay" && (
+                                            <Button 
+                                                disabled={loading}
+                                                onClick={handleRazorpayCheckout}
+                                                className="flex-grow h-14 rounded-2xl text-base font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20"
+                                            >
+                                                {loading ? "Processing..." : "Pay Now"}
+                                            </Button>
+                                        )}
                                     </div>
                                 )}
                             </div>
