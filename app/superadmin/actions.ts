@@ -215,9 +215,15 @@ export async function updateBusiness(formData: FormData) {
 
     const tagline         = formData.get("tagline")         as string;
     const description     = formData.get("description")     as string;
+    
+    // Add missing contact fields
+    const phone           = formData.get("phone")           as string;
+    const whatsapp        = formData.get("whatsapp")        as string;
+    const email           = formData.get("email")           as string;
  
     const { error } = await db.from("businesses").update({
         name, slug, tagline, description, business_type, services_label, currency_symbol, primary_color, secondary_color,
+        phone, whatsapp, email
     }).eq("id", id);
 
     if (error) throw new Error(error.message);
