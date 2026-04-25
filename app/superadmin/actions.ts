@@ -172,14 +172,33 @@ export async function reassignAdminUser(formData: FormData) {
 }
 
 /**
- * Removes an admin user from a business (deletes membership only, not the auth user).
+ * Removes an admin user from a business and PERMANENTLY deletes their auth account.
  */
 export async function removeAdminUser(formData: FormData) {
     const membership_id = formData.get("membership_id") as string;
     const business_id   = formData.get("business_id")   as string;
 
     const db = createServiceClient();
-    await db.from("memberships").delete().eq("id", membership_id);
+
+    // 1. Find the user ID from the membership first
+    const { data: membership } = await db
+        .from("memberships")
+        .select("user_id")
+        .eq("id", membership_id)
+        .single();
+
+    if (membership?.user_id) {
+        // 2. Delete the user from Auth (this will cascade delete memberships via DB foreign key)
+        const { error: deleteError } = await db.auth.admin.deleteUser(membership.user_id);
+        if (deleteError) {
+            // If auth delete fails (e.g. user already gone), at least remove the membership
+            await db.from("memberships").delete().eq("id", membership_id);
+        }
+    } else {
+        // If no user found, just cleanup the membership record
+        await db.from("memberships").delete().eq("id", membership_id);
+    }
+
     revalidatePath(`/superadmin/clients/${business_id}`);
 }
 
