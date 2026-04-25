@@ -84,7 +84,25 @@ export default async function SiteLayout({ children, params }: Props) {
     };
 
     const onlinePaymentsEnabled = (business as any).business_tools?.some((t: any) => t.tool_key === 'online_payments' && t.is_enabled) ?? false;
+    const customerLoginEnabled = (business as any).business_tools?.some((t: any) => t.tool_key === 'customer_login' && t.is_enabled) ?? false;
     const config = getBusinessConfig((business as any).business_type);
+
+    const { createClient } = await import("@/lib/supabase/server");
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    let validCustomerUser = null;
+    if (user) {
+        const { data: existingCustomer } = await db
+            .from("customers")
+            .select("id")
+            .eq("business_id", business.id)
+            .eq("auth_user_id", user.id)
+            .single();
+        if (existingCustomer) {
+            validCustomerUser = user;
+        }
+    }
 
     return (
         <NextIntlClientProvider locale={locale} messages={messages}>
@@ -105,6 +123,8 @@ export default async function SiteLayout({ children, params }: Props) {
                             template={template}
                             categories={categories ?? []}
                             businessConfig={config}
+                            customerLoginEnabled={customerLoginEnabled}
+                            user={validCustomerUser}
                         />
                         <main className="flex-grow">{children}</main>
                         <Footer
@@ -128,6 +148,9 @@ export default async function SiteLayout({ children, params }: Props) {
                             upiId={(business as any).upi_id ?? null}
                             onlinePaymentsEnabled={onlinePaymentsEnabled}
                             template={template}
+                            customerLoginEnabled={customerLoginEnabled}
+                            isLoggedIn={!!validCustomerUser}
+                            siteSlug={isCustomDomain ? null : slug}
                         />
                     </div>
                 </ThemeProvider>

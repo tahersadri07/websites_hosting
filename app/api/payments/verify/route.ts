@@ -59,17 +59,34 @@ export async function POST(request: Request) {
 
         // CRM Integration
         try {
-            await (supabase as any)
-                .from("customers")
-                .upsert({
-                    business_id: businessId,
-                    name: details.name,
-                    phone: details.phone,
-                    address: details.address || null,
-                    last_contacted_at: new Date().toISOString(),
-                }, {
-                    onConflict: 'business_id,phone'
-                });
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (user) {
+                // Update the logged-in user's customer record with their latest details
+                await (supabase as any)
+                    .from("customers")
+                    .update({
+                        name: details.name,
+                        phone: details.phone,
+                        address: details.address || null,
+                        last_contacted_at: new Date().toISOString(),
+                    })
+                    .eq("auth_user_id", user.id)
+                    .eq("business_id", businessId);
+            } else {
+                // Upsert by phone for guests
+                await (supabase as any)
+                    .from("customers")
+                    .upsert({
+                        business_id: businessId,
+                        name: details.name,
+                        phone: details.phone,
+                        address: details.address || null,
+                        last_contacted_at: new Date().toISOString(),
+                    }, {
+                        onConflict: 'business_id,phone'
+                    });
+            }
         } catch (crmErr) {
             console.error("Failed to sync to CRM", crmErr);
         }

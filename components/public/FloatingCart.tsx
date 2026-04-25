@@ -6,6 +6,7 @@ import {
     Heart, ArrowRight, Trash2 
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { 
     Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, 
     SheetFooter, SheetDescription 
@@ -27,10 +28,15 @@ interface Props {
     upiId?: string | null;
     onlinePaymentsEnabled?: boolean;
     template?: any;
+    customerLoginEnabled?: boolean;
+    isLoggedIn?: boolean;
+    siteSlug?: string | null;
 }
 
-export function FloatingCart({ businessId, businessName, whatsappNumber, currencySymbol, upiId, onlinePaymentsEnabled = true, template }: Props) {
+export function FloatingCart({ businessId, businessName, whatsappNumber, currencySymbol, upiId, onlinePaymentsEnabled = true, template, customerLoginEnabled = false, isLoggedIn = false, siteSlug }: Props) {
     const colors = template?.colors || { bg: "#0A0A0F", border: "#27272A", text: "#FFFFFF", textMuted: "#A1A1AA", primary: "#6366F1", surface: "#13131A" };
+    
+    const searchParams = useSearchParams();
 
     const { 
         items, wishlist, itemCount, wishlistCount, totalPrice, 
@@ -45,10 +51,24 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
     const [transactionId, setTransactionId] = useState("");
     const [loading, setLoading] = useState(false);
 
+    // Auto-open cart if redirected back after login for checkout
+    useEffect(() => {
+        if (searchParams?.get("checkout") === "true") {
+            setIsDrawerOpen(true);
+            setActiveTab("cart");
+            setStep("details");
+        }
+    }, [searchParams]);
+
     // Reset step when tab changes or drawer closes
     useEffect(() => {
-        if (!isDrawerOpen) setStep("review");
-    }, [isDrawerOpen, activeTab]);
+        if (!isDrawerOpen) {
+            // Only reset to review if we're not actively forcing checkout from URL
+            if (searchParams?.get("checkout") !== "true") {
+                setStep("review");
+            }
+        }
+    }, [isDrawerOpen, activeTab, searchParams]);
 
     const handleRazorpayCheckout = async () => {
         if (!businessId) return;
@@ -468,7 +488,14 @@ export function FloatingCart({ businessId, businessName, whatsappNumber, currenc
                                     <span className="text-2xl font-black text-business-primary">{currencySymbol}{totalPrice.toLocaleString()}</span>
                                 </div>
                                 {step === "review" ? (
-                                    <Button onClick={() => setStep("details")} 
+                                    <Button onClick={() => {
+                                        if (customerLoginEnabled && !isLoggedIn) {
+                                            const base = siteSlug ? `/sites/${siteSlug}` : '';
+                                            window.location.href = `${base}/login?checkout=true`;
+                                        } else {
+                                            setStep("details");
+                                        }
+                                    }} 
                                         style={{ background: colors.primary, color: "#fff" }}
                                         className="w-full py-7 rounded-2xl text-base font-bold shadow-xl hover:opacity-90">
                                         Proceed to Checkout

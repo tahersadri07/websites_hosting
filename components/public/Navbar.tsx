@@ -9,10 +9,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Menu, X, MessageCircle, Heart, ShoppingCart } from "lucide-react";
+import { Menu, X, MessageCircle, Heart, ShoppingCart, User } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 interface Category {
     id: string;
@@ -29,9 +30,11 @@ interface NavbarProps {
     template?: TemplateConfig | null;
     categories?: Category[];
     businessConfig?: BusinessConfig;
+    customerLoginEnabled?: boolean;
+    user?: SupabaseUser | null;
 }
 
-export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, siteSlug, template, categories = [], businessConfig }: NavbarProps) {
+export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, siteSlug, template, categories = [], businessConfig, customerLoginEnabled = false, user = null }: NavbarProps) {
     const { itemCount, wishlistCount, setIsDrawerOpen, setActiveTab } = useCart();
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
@@ -158,6 +161,19 @@ export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, s
                     {/* CTA + Language */}
                     <div className="hidden md:flex items-center gap-3">
                         <div className="flex items-center gap-1.5 mr-2">
+                            {customerLoginEnabled && (
+                                <Link 
+                                    href={user ? `${base}/account` : `${base}/login`}
+                                    style={{ color: colors.textMuted }}
+                                    className="p-2 rounded-xl hover:bg-black/5 relative group transition-all"
+                                    title={user ? "My Account" : "Login"}
+                                >
+                                    <User className="w-5 h-5" />
+                                    {user && (
+                                        <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></span>
+                                    )}
+                                </Link>
+                            )}
                             <button 
                                 onClick={() => { setActiveTab("wishlist"); setIsDrawerOpen(true); }}
                                 style={{ color: colors.textMuted }}
@@ -255,10 +271,21 @@ export function Navbar({ businessName, logoUrl, whatsappNumber, servicesLabel, s
                         </div>
                     ))}
                     <div style={{ borderColor: colors.border }} className="border-t mt-4 pt-4 space-y-2">
+                        {customerLoginEnabled && (
+                            <Link 
+                                href={user ? `${base}/account` : `${base}/login`}
+                                onClick={() => setIsOpen(false)}
+                                style={{ color: colors.textMuted, backgroundColor: `${colors.primary}10`, borderRadius: template?.style.heroRadius === 'rounded-none' ? '0' : '12px' }}
+                                className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold transition-all hover:opacity-80"
+                            >
+                                <User className="w-4 h-4" />
+                                {user ? "My Account" : "Login / Sign Up"}
+                            </Link>
+                        )}
                         {whatsappNumber && (
                             <button onClick={() => { handleWhatsApp(); setIsOpen(false); }}
-                                style={{ backgroundColor: colors.primary }}
-                                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-white text-sm font-semibold"
+                                style={{ backgroundColor: colors.primary, borderRadius: template?.style.heroRadius === 'rounded-none' ? '0' : '12px' }}
+                                className="w-full flex items-center justify-center gap-2 px-4 py-3 text-white text-sm font-semibold"
                             >
                                 <MessageCircle className="w-4 h-4" />
                                 {t("bookNow")}

@@ -1,0 +1,17 @@
+import { createClient } from "@supabase/supabase-js";
+import { NextResponse } from "next/server";
+
+export const dynamic = 'force-dynamic';
+
+export async function GET() {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    
+    const db = createClient(supabaseUrl, supabaseKey);
+    
+    const { data: businesses, error } = await db
+        .from("businesses")
+        .select("slug, name, business_tools(tool_key, is_enabled)");
+        
+    return NextResponse.json({ businesses, error });
+}
