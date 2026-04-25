@@ -102,6 +102,28 @@ export function EditClientForm({ biz }: Props) {
                             className="w-full h-10 px-3 rounded-xl bg-[#0A0A0F] border border-[#27272A] text-white text-sm focus:outline-none focus:border-indigo-500/60" />
                     </div>
 
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] uppercase font-bold text-zinc-500">Phone Number</label>
+                            <input name="phone" defaultValue={biz.phone}
+                                placeholder="+91 98765 43210"
+                                className="w-full h-10 px-3 rounded-xl bg-[#0A0A0F] border border-[#27272A] text-white text-sm focus:outline-none focus:border-indigo-500/60" />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] uppercase font-bold text-zinc-500">WhatsApp</label>
+                            <input name="whatsapp" defaultValue={biz.whatsapp}
+                                placeholder="+91 98765 43210"
+                                className="w-full h-10 px-3 rounded-xl bg-[#0A0A0F] border border-[#27272A] text-white text-sm focus:outline-none focus:border-indigo-500/60" />
+                        </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] uppercase font-bold text-zinc-500">Business Email</label>
+                        <input name="email" defaultValue={biz.email}
+                            placeholder="contact@business.com"
+                            className="w-full h-10 px-3 rounded-xl bg-[#0A0A0F] border border-[#27272A] text-white text-sm focus:outline-none focus:border-indigo-500/60" />
+                    </div>
+
                     <div className="space-y-1.5">
                         <label className="text-[10px] uppercase font-bold text-zinc-500">Business Description (SEO)</label>
                         <textarea name="description" defaultValue={biz.description}
