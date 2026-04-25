@@ -115,10 +115,14 @@ export async function inviteAdminUser(formData: FormData) {
 
     if (authError) {
         // If user already exists, we find them and just re-link
-        if (authError.message.includes("already been registered")) {
-            const { data: { users }, error: listError } = await db.auth.admin.listUsers();
+        if (authError.message.includes("already been registered") || authError.message.includes("already exists")) {
+            // Fetch all users to find the one with this email (Supabase admin list is the only way without a custom index)
+            // But we'll try to use the search parameter if available in newer Supabase versions
+            const { data: { users }, error: listError } = await db.auth.admin.listUsers({
+                perPage: 1000 // Increase limit to find them
+            });
             const existingUser = users.find(u => u.email?.toLowerCase() === email.toLowerCase());
-            if (!existingUser) throw new Error("User exists in Auth but could not be found in list.");
+            if (!existingUser) throw new Error("User exists in Auth but could not be found. Please contact support.");
             userId = existingUser.id;
         } else {
             throw new Error(`Auth error: ${authError.message}`);

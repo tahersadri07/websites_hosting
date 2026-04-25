@@ -104,5 +104,20 @@ export async function getAdminBusinessSlug(): Promise<string> {
     }
 
     // ── Final fallback ────────────────────────────────────────────────────────
+    // If we're on the root domain and the user is NOT logged in, we can show the fallback.
+    // If the user IS logged in but has no membership, we return empty so they get Access Denied.
+    const isRootDomain = host === platformHost || host === `www.${platformHost}` || host.includes("localhost");
+    
+    // Only return the environment fallback if we are on the root domain AND the user is not logged in
+    // (This supports local development while preventing production security leaks)
+    if (isRootDomain) {
+        try {
+            const { createClient } = await import("./supabase/server");
+            const supabase = await createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) return ""; // Logged in but no membership? Return empty.
+        } catch { /* ignore */ }
+    }
+
     return process.env.NEXT_PUBLIC_BUSINESS_SLUG ?? "";
 }
